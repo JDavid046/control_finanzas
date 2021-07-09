@@ -12,19 +12,12 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
 </head>
 <body>
-    {% if messages %}
-    {% for message in messages %}
-    <div class="notification {{ message.tags}}">
-        {{ message }}
-    </div>
-    {% endfor %}
-    {% endif %} 
 
     {% block cuerpo %}
-        <h1>hola Index</h1>
+        <h1>hola {{ request.user.username }}</h1>
+        <h1>Capital Total: {{ request.user.profile.capitalTotal }}</h1>
         {% if request.user.is_authenticated %}
-        <li><a href="{% url 'logout' %}">Logout</a></li>
-        {% else %}
+        <li><a href="{% url 'logout' %}">Logout</a></li>        
         {% endif %}
    {% endblock %}
 

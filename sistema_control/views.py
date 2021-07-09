@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate, login
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
@@ -22,3 +23,22 @@ def register(request):
 
     context = {'form':form}                
     return render(request, 'register.html', context)
+
+def login(request):
+    if request.method == 'POST':
+        form = UserLoginForm(request.POST)
+        email = request.POST["email"]
+        password = request.POST["password"]
+        print(email)
+        print(password)
+        user = authenticate(email=email, password=password)
+        print(user)
+        if user:            
+            login(request, user)
+            return render(request, 'index.html')
+
+    else:        
+        form = UserLoginForm()
+
+    context = {'form':form}                
+    return render(request, 'login.html', context)
