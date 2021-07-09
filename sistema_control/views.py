@@ -1,44 +1,66 @@
-from django.contrib.auth import authenticate, login
-from django.shortcuts import redirect, render
+from django.contrib import auth
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib import messages
-from .models import *
-from .forms import *
+from django.shortcuts import redirect, render
+from django.contrib.auth import authenticate, login, logout
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from .forms import UserLoginForm, UserRegisterForm
+from django.contrib.auth import get_user_model
 
 @login_required
 def home(request):    
     return render(request, 'index.html')
 
-def register(request):
-    if request.method =='POST':
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data['username']
-            messages.success(request, 'Usuario: ' + username + ' creado.\n Inicie Sesión')
-            return redirect('login')
-    else:
-        form = UserRegisterForm()
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('login'))
 
-    context = {'form':form}                
-    return render(request, 'register.html', context)
-
-def login(request):
-    if request.method == 'POST':
-        form = UserLoginForm(request.POST)
-        email = request.POST["email"]
-        password = request.POST["password"]
-        print(email)
-        print(password)
-        user = authenticate(email=email, password=password)
-        print(user)
-        if user:            
-            login(request, user)
-            return render(request, 'index.html')
-
-    else:        
+def user_login(request):
+    if request.method != 'POST':
         form = UserLoginForm()
 
-    context = {'form':form}                
+    else:
+        username = request.POST['username']
+        password = request.POST['password']
+
+        user = authenticate(username=username, password=password)
+        print(user)
+        print(username)
+        print(password)
+        if user is not None and user.is_active:
+            login(request, user)
+            return HttpResponseRedirect(reverse('home'))
+        else:
+            form = UserLoginForm()
+            context = {'form':form, 'login_wrong':True}
+            return render(request, 'login.html', context)
+
+    context = {'form':form}
     return render(request, 'login.html', context)
+
+
+def user_register(request):
+    if request.method != 'POST':
+        form = UserRegisterForm()
+
+    else:
+        form = UserRegisterForm(data=request.POST)
+
+        if form.is_valid():
+
+            username = request.POST['username']  
+            email = request.POST['email']                                   
+            password = request.POST['password1']
+            User = get_user_model()
+            User.objects.create_user(username=username, email=email,password=password)
+            authenticated_user = authenticate(username=username, email=email,password=password)
+            login(request, authenticated_user)
+            #form.save()
+            return HttpResponseRedirect(reverse('home'))
+
+    context = {'form': form}
+    return render(request, 'register.html', context)            
+
+
+def olvide_contrasena(request):
+    return render(request, 'password.html')
