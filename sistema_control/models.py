@@ -8,7 +8,7 @@ class TipoMovimiento(models.Model):
     nombreTipoMovimiento = models.CharField(max_length=7)
 
     def __str__(self):
-        return str(self.id) + " - " + self.nombreTipoMovimiento
+        return self.nombreTipoMovimiento
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

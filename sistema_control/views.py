@@ -1,3 +1,5 @@
+from django.db.models.aggregates import Sum
+from sistema_control.models import Movimiento, Profile, TipoMovimiento
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
@@ -8,8 +10,14 @@ from .forms import UserLoginForm, UserRegisterForm
 from django.contrib.auth import get_user_model
 
 @login_required
-def home(request):    
-    return render(request, 'index.html')
+def home(request):  
+    ingresos = Movimiento.objects.filter(tipoMovimiento=1).aggregate(Sum('valorMovimiento'))
+    egresos = Movimiento.objects.filter(tipoMovimiento=2).aggregate(Sum('valorMovimiento'))
+    context = {
+        'ingresos':ingresos['valorMovimiento__sum'],
+        'egresos':egresos['valorMovimiento__sum']
+    }    
+    return render(request, 'index.html', context)
 
 def logout_view(request):
     logout(request)
@@ -64,3 +72,9 @@ def user_register(request):
 
 def olvide_contrasena(request):
     return render(request, 'password.html')
+
+@login_required
+def movimientos_usuario(request):
+    movimientos = Movimiento.objects.filter(usuario = request.user)
+    context = {'movimientos':movimientos}    
+    return render(request, 'movimientos.html', context)

@@ -2,15 +2,11 @@
 
 {% block titulo %}Inicio{% endblock %}
 
-{% block scripts %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js" crossorigin="anonymous"></script>
-{% endblock %}
-
 {% block cuerpo %}
 <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <!-- Navbar Brand-->
-        <a class="navbar-brand ps-3" href="{% url 'home' %}">Mis Finanzas</a>
+        <a class="navbar-brand ps-3" href="{% url 'home' %}">Mis Finanzas<i class="fas fa-hand-holding-usd" style="margin-left: 20;"></i></a>        
         <!-- Sidebar Toggle-->
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
         <!-- Navbar Search-->
@@ -37,65 +33,26 @@
                     <div class="nav">
                         <div class="sb-sidenav-menu-heading">Principal</div>
                         <a class="nav-link" href="{% url 'home' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            <div class="sb-nav-link-icon"><i class="fas fa-home"></i></div>
                             Inicio
                         </a>
-                        <div class="sb-sidenav-menu-heading">Interface</div>
-                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
-                            <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                            Layouts
-                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                        </a>
-                        <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
-                            <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" href="layout-static.html">Static Navigation</a>
-                                <a class="nav-link" href="layout-sidenav-light.html">Light Sidenav</a>
-                            </nav>
-                        </div>
-                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
-                            <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
-                            Pages
-                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                        </a>
-                        <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
-                            <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
-                                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseAuth" aria-expanded="false" aria-controls="pagesCollapseAuth">
-                                    Authentication
-                                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                                </a>
-                                <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
-                                    <nav class="sb-sidenav-menu-nested nav">
-                                        <a class="nav-link" href="login.html">Login</a>
-                                        <a class="nav-link" href="register.html">Register</a>
-                                        <a class="nav-link" href="password.html">Forgot Password</a>
-                                    </nav>
-                                </div>
-                                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseError" aria-expanded="false" aria-controls="pagesCollapseError">
-                                    Error
-                                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                                </a>
-                                <div class="collapse" id="pagesCollapseError" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
-                                    <nav class="sb-sidenav-menu-nested nav">
-                                        <a class="nav-link" href="401.html">401 Page</a>
-                                        <a class="nav-link" href="404.html">404 Page</a>
-                                        <a class="nav-link" href="500.html">500 Page</a>
-                                    </nav>
-                                </div>
-                            </nav>
-                        </div>
-                        <div class="sb-sidenav-menu-heading">Addons</div>
-                        <a class="nav-link" href="charts.html">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Charts
+                        <div class="sb-sidenav-menu-heading">Información</div>
+                        <a class="nav-link" href="{% url 'movimientos' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-random"></i></div>
+                            Movimientos
                         </a>
                         <a class="nav-link" href="tables.html">
-                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                            Tables
+                            <div class="sb-nav-link-icon"><i class="fas fa-sign-in-alt"></i></div>
+                            Ingresos
+                        </a>
+                        <a class="nav-link" href="tables.html">
+                            <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>
+                            Egresos
                         </a>
                     </div>
                 </div>
                 <div class="sb-sidenav-footer">
-                    <div class="small">Logged in as:</div>
+                    <div class="small"><b>Sesión de:</b></div>
                     {{ request.user.username }}
                     <br>
                     {{ request.user.email }}
@@ -113,10 +70,11 @@
                             <div class="card bg-primary text-white mb-4">
                                 <div class="card-body"><b>Capital Total</b>
                                 <br>
-                                <h2>{{request.user.profile.capitalTotal}}</h2>    
+                                {% load humanize %}
+                                <h2>{{request.user.profile.capitalTotal|intcomma}}</h2>    
                                 </div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="#">Ver Detalles</a>                                    
+                                    <a class="small text-white stretched-link" href="{% url 'movimientos' %}">Ver Detalles</a>                                    
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                 </div>
                             </div>
@@ -124,8 +82,8 @@
                         <div class="col-xl-3 col-md-6">
                             <div class="card bg-success text-white mb-4">
                                 <div class="card-body"><b>Ingresos</b>
-                                    <br>
-                                    <h2>{{request.user.profile.capitalTotal}}</h2>   
+                                    {% load humanize %}
+                                <h2>{{ingresos|intcomma}}</h2>   
                                     </div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
                                     <a class="small text-white stretched-link" href="#">View Details</a>
@@ -136,8 +94,8 @@
                         <div class="col-xl-3 col-md-6">
                             <div class="card bg-danger text-white mb-4">
                                 <div class="card-body"><b>Egresos</b>
-                                    <br>
-                                    <h2>{{request.user.profile.capitalTotal}}</h2>   
+                                    {% load humanize %}
+                                <h2>{{egresos|intcomma}}</h2>   
                                     </div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
                                     <a class="small text-white stretched-link" href="#">View Details</a>
@@ -655,19 +613,7 @@
                         </div>
                     </div>
                 </div>
-            </main>
-            <footer class="py-4 bg-light mt-auto">
-                <div class="container-fluid px-4">
-                    <div class="d-flex align-items-center justify-content-between small">
-                        <div class="text-muted">Copyright &copy; Your Website 2021</div>
-                        <div>
-                            <a href="#">Privacy Policy</a>
-                            &middot;
-                            <a href="#">Terms &amp; Conditions</a>
-                        </div>
-                    </div>
-                </div>
-            </footer>
+            </main>            
         </div>
     </div>
 
