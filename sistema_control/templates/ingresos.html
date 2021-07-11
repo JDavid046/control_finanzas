@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 
-{% block titulo %}Movimientos{% endblock %}
+{% block titulo %}Ingresos{% endblock %}
 
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js" crossorigin="anonymous"></script>
@@ -66,45 +66,15 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4">Movimientos</h1>
+                    <h1 class="mt-4">Ingresos</h1>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
-                        <li class="breadcrumb-item active">Movimientos</li>
+                        <li class="breadcrumb-item active">Ingresos</li>
                     </ol>
                     <div class="card mb-4">
                         <div class="card-body">
                             <i class="fas fa-table me-1"></i>
-                            Movimientos de <b>{{ request.user.username }}</b>
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter" data-backdrop="static">
-                                    AgregarMovimiento
-                                </button>                                
-                                <a href="{% url 'export-excel' %}" class="btn btn-outline-warning"><i class="fas fa-download"></i></a>
-                                
-                                <!-- Modal -->
-                                <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalCenterTitle">Agregar Movimiento</h5>
-                                        <button type="button" class="btn btn-outline-primary" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form method="POST">
-                                                {% csrf_token %}
-                                                {{ form.as_p }}                                            
-                                        </div>
-                                        <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                                        <button type="submit" id="submit" class="btn btn-primary">Guardar</button>
-                                        </form>
-                                        </div>
-                                    </div>
-                                    </div>
-                                </div>
-                              </div>
+                            Ingresos de <b>{{ request.user.username }}</b>                         
                         </div>
                     </div>                
                     <div class="card mb-4">  
@@ -113,21 +83,21 @@
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Valor Movimiento</th>
                                         <th>Tipo Movimiento</th>
+                                        <th>Valor Movimiento</th>                                        
                                         <th>Descripción Movimiento</th>
                                         <th>Fecha Movimiento</th>                                        
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% load humanize %}
-                                    {% for movimento in movimientos %}
+                                    {% for movimiento in movimientos %}
                                     <tr>                                        
-                                        <td>{{ movimento.id }}</td>
-                                        <td>{{ movimento.valorMovimiento|intcomma }}</td>
-                                        <td>{{ movimento.tipoMovimiento }}</td>
-                                        <td>{{ movimento.descripcionMovimiento }}</td>
-                                        <td>{{ movimento.fechaMovimiento }}</td>
+                                        <td>{{ movimiento.id }}</td>
+                                        <td>{{ movimiento.tipoMovimiento }}</td>
+                                        <td>{{ movimiento.valorMovimiento|intcomma }}</td>                                        
+                                        <td>{{ movimiento.descripcionMovimiento }}</td>
+                                        <td>{{ movimiento.fechaMovimiento }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>

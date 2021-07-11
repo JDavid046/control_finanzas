@@ -10,6 +10,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('password/', views.olvide_contrasena, name='password'),
     path('movimientos/', views.movimientos_usuario, name='movimientos'),
-    #path('login/', LoginView.as_view(template_name='login.html'), name='login'),
-    #path('logout/', LogoutView.as_view(template_name='logout.html'), name='logout'),
+    path('ingresos/', views.ingresos_usuario, name='ingresos'),
+    path('egresos/', views.egresos_usuario, name='egresos'),
+    path('export-excel/', views.export_excel, name='export-excel'),    
 ]

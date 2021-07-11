@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'sistema_control.apps.SistemaControlConfig',
-    'django.contrib.humanize',
+    'django.contrib.humanize',        
 ]
 
 MIDDLEWARE = [

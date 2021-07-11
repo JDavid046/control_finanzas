@@ -13,6 +13,7 @@ class TipoMovimiento(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     capitalTotal = models.DecimalField(max_digits=20, decimal_places=3, default=0)
+    deudas = models.DecimalField(max_digits=20, decimal_places=3, default=0)
 
     def __str__(self):
         return self.user.username
