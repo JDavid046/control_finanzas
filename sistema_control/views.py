@@ -1,5 +1,5 @@
 import datetime
-import pandas as pd
+from django.contrib.auth.forms import UserCreationForm
 import xlwt
 import csv
 from django.contrib.auth.models import User
@@ -155,13 +155,14 @@ def egresos_usuario(request):
     return render(request, 'egresos.html', context)    
 
 
-def export_excel(request):    
-    response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename=Movimientos'+\
-        str(datetime.datetime.now()) + '.xls'
+def export_excel(request, nombre):    
+    response = HttpResponse(content_type='application/ms-excel')    
+
+    response['Content-Disposition'] = 'attachment; filename="'+nombre+' de "'+request.user.username+" "+\
+        str(datetime.datetime.now()) + '.xls'    
 
     wb = xlwt.Workbook(encoding='UTF-8')        
-    ws = wb.add_sheet('Movimientos')
+    ws = wb.add_sheet(nombre)
     row_num = 0
     font_style = xlwt.XFStyle()
     font_style.font.bold = True
@@ -173,8 +174,22 @@ def export_excel(request):
 
     font_style = xlwt.XFStyle()
 
-    rows = Movimiento.objects.all().filter(usuario=request.user).values_list('id', 'tipoMovimiento', 'descripcionMovimiento', 'valorMovimiento', 'fechaMovimiento')    
+    switch_tabla = {        
+        'movimiento':Movimiento.objects.all().filter(usuario=request.user).values_list('id', 'tipoMovimiento', 'descripcionMovimiento', 'valorMovimiento', 'fechaMovimiento'),
+        'ingreso':Movimiento.objects.all().filter(usuario=request.user,tipoMovimiento=1).values_list('id', 'tipoMovimiento', 'descripcionMovimiento', 'valorMovimiento', 'fechaMovimiento'),
+        'egreso':Movimiento.objects.all().filter(usuario=request.user,tipoMovimiento=2).values_list('id', 'tipoMovimiento', 'descripcionMovimiento', 'valorMovimiento', 'fechaMovimiento'),
+    }
 
+    rows = None
+
+    if nombre == 'Movimientos':
+        rows = switch_tabla['movimiento']
+    elif nombre == 'Ingresos':
+        rows = switch_tabla['ingreso']
+    elif nombre == 'Egresos':
+        rows = switch_tabla['egreso']        
+
+         
     for row in rows:
         row_num += 1
 
@@ -183,3 +198,7 @@ def export_excel(request):
     wb.save(response)
 
     return response
+
+@login_required
+def  perfil_usuario(request):
+    return render(request, 'perfil.html')

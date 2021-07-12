@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.db.models import fields
 from django.forms import widgets
 from django.forms.fields import EmailField
 import datetime
@@ -51,6 +52,5 @@ class MovimientoForm(forms.ModelForm):
         widgets = {
             'tipoMovimiento': forms.Select(attrs={'class':'form-select'}),
             'descripcionMovimiento': forms.Textarea(attrs={'class':'form-control'}),
-            'valorMovimiento': forms.NumberInput(attrs={'class':'form-control'}),
-            #'fechaMovimiento': forms.SelectDateWidget(initial=datetime.date.today())
+            'valorMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'0'}),            
         }
