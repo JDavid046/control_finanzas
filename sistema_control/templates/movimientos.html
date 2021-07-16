@@ -70,18 +70,23 @@
                         <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
                         <li class="breadcrumb-item active">Movimientos</li>
                     </ol>
-                    <div class="card mb-4">
+                    {% if errores == True %}
+                        <div class="alert alert-dark" role="alert">
+                            <b>Error.</b> No se puede agregar Egreso Superior al Capital Total.
+                        </div>
+                        {% endif %}
+                    <div class="card mb-4">                        
                         <div class="card-body">
                             <i class="fas fa-table me-1"></i>
                             Movimientos de <b>{{ request.user.username }}</b>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter" data-backdrop="static">
-                                    AgregarMovimiento
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#agregarMovimiento" data-backdrop="static">
+                                    Agregar Movimiento
                                 </button>                                
                                 <a href="{% url 'export-excel' nombre='Movimientos' %}" class="btn btn-outline-warning"><i class="fas fa-download"></i></a>
                                 
-                                <!-- Modal -->
-                                <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                <!-- Modal Agregar-->
+                                <div class="modal fade" id="agregarMovimiento" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -102,7 +107,7 @@
                                         </div>
                                     </div>
                                     </div>
-                                </div>
+                                </div>                                                                                                                                  
                               </div>
                         </div>
                     </div>                
@@ -115,19 +120,44 @@
                                         <th>Valor Movimiento</th>
                                         <th>Tipo Movimiento</th>
                                         <th>Descripción Movimiento</th>
-                                        <th>Fecha Movimiento</th>                                        
+                                        <th>Fecha Movimiento</th>
+                                        <th colspan="2">Opciones</th>                                        
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% load humanize %}
-                                    {% for movimento in movimientos %}
+                                    {% for movimiento in movimientos %}
                                     <tr>                                        
-                                        <td>{{ movimento.id }}</td>
-                                        <td>{{ movimento.valorMovimiento|intcomma }}</td>
-                                        <td>{{ movimento.tipoMovimiento }}</td>
-                                        <td>{{ movimento.descripcionMovimiento }}</td>
-                                        <td>{{ movimento.fechaMovimiento }}</td>
+                                        <td>{{ movimiento.id }}</td>
+                                        <td>{{ movimiento.valorMovimiento|intcomma }}</td>
+                                        <td>{{ movimiento.tipoMovimiento }}</td>
+                                        <td>{{ movimiento.descripcionMovimiento }}</td>
+                                        <td>{{ movimiento.fechaMovimiento }}</td>
+                                        <td><a href="{% url 'editarMovimiento' movimiento.id %}" class="btn btn-success">Editar</a></td>
+                                        <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#eliminarModal{{movimiento.id}}">Eliminar</button></td>
                                     </tr>
+
+                                    <!-- Modal Eliminar -->
+                                <div class="modal fade" id="eliminarModal{{movimiento.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Eliminar Movimiento</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Está seguro que desea eliminar el movimiento:
+                                            <br>
+                                            <b>
+                                            {{ movimiento.tipoMovimiento }} - {{ movimiento.descripcionMovimiento }} - {{ movimiento.movimiento.valorMovimiento|intcomma }}</b>
+                                        </div>
+                                        <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <a href="{% url 'eliminarMovimiento' movimiento.id %}" class="btn btn-danger" >Eliminar</a>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
                                     {% endfor %}
                                 </tbody>
                             </table>

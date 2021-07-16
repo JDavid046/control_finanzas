@@ -4,7 +4,7 @@ import xlwt
 import csv
 from django.contrib.auth.models import User
 from django.db.models.aggregates import Sum
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse, HttpResponseNotAllowed
 from xlwt.BIFFRecords import XcallSupBookRecord
 from xlwt.Style import XFStyle
 from sistema_control.models import Movimiento, Profile, TipoMovimiento
@@ -111,36 +111,108 @@ def movimientos_usuario(request):
 
             fechaNuevoMovimiento = diaNuevoMovimiento+"/"+mesNuevoMovimiento+"/"+anioNuevoMovimiento
             fechaNuevoMovimiento = datetime.datetime.strptime(fechaNuevoMovimiento, "%d/%m/%Y").strftime("%Y-%m-%d")            
-            
-            Movimiento.objects.create(descripcionMovimiento=descripcionNuevoMovimiento,
+
+            calculo = calculoNuevoCapital(request.user, int(valorNuevoMovimiento), tipoNuevoMovimiento.id, 'nuevo', None)
+            if calculo:
+                Movimiento.objects.create(descripcionMovimiento=descripcionNuevoMovimiento,
                                         fechaMovimiento=fechaNuevoMovimiento, tipoMovimiento=tipoNuevoMovimiento,
                                         usuario=user, valorMovimiento=valorNuevoMovimiento)
 
-            calculoNuevoCapital(request.user, int(valorNuevoMovimiento), tipoNuevoMovimiento.id)
-
-            return HttpResponseRedirect(reverse('movimientos'))
+                return HttpResponseRedirect(reverse('movimientos'))
+            else:
+                movimientos = Movimiento.objects.filter(usuario = request.user)        
+                movimientoForm = MovimientoForm()
+                context = {'movimientos':movimientos, 'form':movimientoForm, 'errores': True}                                      
 
     return render(request, 'movimientos.html', context)
 
-def calculoNuevoCapital(usuario, valorMovimiento, tipoMovimiento):
+def calculoNuevoCapital(usuario, valorMovimiento, tipoMovimiento, accion, valorAnterior):
+    estatus = False
     nuevoCapital = 0
 
     user = Profile.objects.get(user=usuario)     
     capital = user.capitalTotal
 
-    if capital < valorMovimiento and tipoMovimiento == 2:
-        user.deudas = capital - valorMovimiento
-        user.capitalTotal = 0
-        user.save()
+    if accion == 'nuevo':        
+        if capital < valorMovimiento and tipoMovimiento == 2:            
+            estatus = False
 
-    else:            
-        if tipoMovimiento == 1:
-            nuevoCapital = capital + valorMovimiento
-        elif tipoMovimiento == 2:
-            nuevoCapital = capital - valorMovimiento
+        else:            
+            if tipoMovimiento == 1:
+                nuevoCapital = capital + valorMovimiento
+            elif tipoMovimiento == 2:
+                nuevoCapital = capital - valorMovimiento
 
-        user.capitalTotal = nuevoCapital
-        user.save()      
+            user.capitalTotal = nuevoCapital
+            user.save()
+
+            estatus = True 
+
+    elif accion == 'editar':        
+
+        if capital < valorMovimiento and tipoMovimiento == 2:
+            estatus = False
+
+        else:
+            if tipoMovimiento == 2:
+                if valorMovimiento > valorAnterior:
+                    nuevoCapital = capital - (valorMovimiento - valorAnterior)
+                elif valorMovimiento < valorAnterior:
+                    nuevoCapital = capital + (valorAnterior -valorMovimiento)
+                else:
+                    nuevoCapital = capital
+            else:
+                if valorMovimiento > valorAnterior:
+                    nuevoCapital = capital + (valorMovimiento - valorAnterior)
+                elif valorMovimiento < valorAnterior:
+                    nuevoCapital = capital - (valorAnterior -valorMovimiento)
+                else:
+                    nuevoCapital = capital                    
+
+            user.capitalTotal = nuevoCapital
+            user.save()
+
+            estatus = True
+
+    return estatus            
+
+
+@login_required
+def editar_movimiento(request, id):
+    movimiento = Movimiento.objects.get(id = id)
+    valorAnterior = movimiento.valorMovimiento    
+    if request.method != 'POST':
+        form = MovimientoForm(instance=movimiento)
+        contexto = {'form':form}
+    else:
+        form = MovimientoForm(request.POST, instance=movimiento)
+        contexto = {'form':form}
+
+        if form.is_valid():           
+
+            tipoNuevoMovimientoId = request.POST['tipoMovimiento']
+            tipoMovimiento = TipoMovimiento.objects.get(id=tipoNuevoMovimientoId)
+            valorMovimiento = request.POST.get('valorMovimiento')                                    
+
+            calculo = calculoNuevoCapital(request.user, int(float(valorMovimiento)), tipoMovimiento.id, 'editar', valorAnterior)                
+            if calculo:
+                form.save()
+                return HttpResponseRedirect(reverse('movimientos'))
+            else:                
+                form = MovimientoForm(instance=movimiento)
+                contexto = {'form':form, 'errores':True}
+    return render(request, 'editarMovimiento.html', contexto)            
+
+
+def eliminar_movimiento(request, id):
+    movimiento = Movimiento.objects.get(id=id)
+    print(movimiento.tipoMovimiento)
+    if movimiento.tipoMovimiento == 'Ingreso':
+        print('Ingreso')
+    elif movimiento.tipoMovimiento == 'Egreso':
+        print('Egreso')        
+
+    return redirect('movimientos')
 
 @login_required
 def ingresos_usuario(request):
