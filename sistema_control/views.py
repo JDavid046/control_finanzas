@@ -204,13 +204,22 @@ def editar_movimiento(request, id):
     return render(request, 'editarMovimiento.html', contexto)            
 
 
+@login_required
 def eliminar_movimiento(request, id):
     movimiento = Movimiento.objects.get(id=id)
-    print(movimiento.tipoMovimiento)
-    if movimiento.tipoMovimiento == 'Ingreso':
-        print('Ingreso')
-    elif movimiento.tipoMovimiento == 'Egreso':
-        print('Egreso')        
+    usuario = Profile.objects.get(user=request.user)    
+    
+    if movimiento.tipoMovimiento_id == 1:
+        usuario.capitalTotal = usuario.capitalTotal - movimiento.valorMovimiento
+        usuario.save()
+
+        movimiento.delete()
+
+    elif movimiento.tipoMovimiento_id == 2:
+        usuario.capitalTotal = usuario.capitalTotal + movimiento.valorMovimiento
+        usuario.save()
+
+        movimiento.delete()
 
     return redirect('movimientos')
 
