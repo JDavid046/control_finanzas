@@ -15,5 +15,6 @@ urlpatterns = [
     path('ingresos/', views.ingresos_usuario, name='ingresos'),
     path('egresos/', views.egresos_usuario, name='egresos'),
     path('export-excel/<str:nombre>/', views.export_excel, name='export-excel'),
-    path('perfil/', views.perfil_usuario, name='perfil'),    
+    path('perfil/', views.perfil_usuario, name='perfil'),
+    path('cambiar-contrasena/', views.cambiar_contrasena, name='cambiarContrasena'),    
 ]

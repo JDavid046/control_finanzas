@@ -1,15 +1,17 @@
 import datetime
+import re
 from django.contrib.auth.forms import UserCreationForm
 import xlwt
 import csv
 from django.contrib.auth.models import User
 from django.db.models.aggregates import Sum
-from django.http.response import HttpResponse, HttpResponseNotAllowed
+from django.http.response import HttpResponse
 from xlwt.BIFFRecords import XcallSupBookRecord
 from xlwt.Style import XFStyle
 from sistema_control.models import Movimiento, Profile, TipoMovimiento
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import check_password, make_password
 from django.shortcuts import redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect
@@ -248,7 +250,7 @@ def export_excel(request, nombre):
     font_style = xlwt.XFStyle()
     font_style.font.bold = True
 
-    columns =['ID', 'Tipo de Movimiento', 'Desripción del Movimiento', 'Valor del Movimiento', 'Fecha del movmiento']
+    columns =['ID', 'Tipo de Movimiento', 'Desripción del Movimiento', 'Valor del Movimiento', 'Fecha del movimiento']
 
     for col_num in range(len(columns)):
         ws.write(row_num, col_num, columns[col_num], font_style)
@@ -282,4 +284,45 @@ def export_excel(request, nombre):
 
 @login_required
 def  perfil_usuario(request):
-    return render(request, 'perfil.html')
+    if request.method == 'POST':
+        name = request.POST.get('nombre')
+        apellido = request.POST.get('apellido')
+        username = request.POST.get('username')
+        correo = request.POST.get('correo')
+
+        usuario = User.objects.get(id=request.user.id)
+        usuario.first_name = name
+        usuario.last_name = apellido
+        usuario.username = username
+        usuario.email = correo
+
+        usuario.save()
+        return HttpResponseRedirect(reverse('perfil'))
+
+    else:
+        context = {'error':''}        
+
+    return render(request, 'perfil.html', context)
+
+
+@login_required
+def cambiar_contrasena(request):
+    usuario = User.objects.get(id=request.user.id)
+    contrasenaActual = request.POST['contrasenaActual']
+    contrasenaNueva = request.POST['contrasenaNueva']        
+    regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$|^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$|^(?=.*[a-z])(?=.*[A-Z])[a-zA-Z\d]{8,}$|^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+    
+    if check_password(contrasenaActual, usuario.password):        
+        if re.search(regex, contrasenaNueva):
+
+            usuario.password = make_password(contrasenaNueva)
+            usuario.save()
+
+            return HttpResponseRedirect(reverse('logout'))
+        else:
+            context = {'error':'Ingrese una contraseña válida.'}
+
+    else:
+        context = {'error':'La Contraseña Actual es incorrecta.'}
+    
+    return render(request, 'perfil.html', context)

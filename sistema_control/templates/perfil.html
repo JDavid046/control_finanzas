@@ -64,50 +64,156 @@
                 <div class="container-fluid px-4">
                     <h1 class="mt-4">Perfil de <b>{{ request.user }}</b></h1>
                     <ol class="breadcrumb mb-4">                        
-                    </ol>
-
-                    <div class="container-fluid px-4">
-                        <div class="input-group mb-3"></div>
-                            <form>
-                                {% csrf_token %}
-                                {{ form.as_p }}
-                            </form>
-                        </div>                            
-                        <!--<div class="input-group mb-3">
-                            <span class="input-group-text" id="basic-addon1">@</span>
-                            <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
-                          </div>
-                          
-                          <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="basic-addon2">
-                            <span class="input-group-text" id="basic-addon2">@example.com</span>
-                          </div>
-                          
-                          <label for="basic-url" class="form-label">Your vanity URL</label>
-                          <div class="input-group mb-3">
-                            <span class="input-group-text" id="basic-addon3">https://example.com/users/</span>
-                            <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
-                          </div>
-                          
-                          <div class="input-group mb-3">
-                            <span class="input-group-text">$</span>
-                            <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)">
-                            <span class="input-group-text">.00</span>
-                          </div>
-                          
-                          <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Username" aria-label="Username">
-                            <span class="input-group-text">@</span>
-                            <input type="text" class="form-control" placeholder="Server" aria-label="Server">
-                          </div>
-                          
-                          <div class="input-group">
-                            <span class="input-group-text">With textarea</span>
-                            <textarea class="form-control" aria-label="With textarea"></textarea>
-                          </div>-->
+                    </ol>                                                                                 
+                      <br>
+                      {% if error != "" %}
+                      <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                      </div>                      
+                      {% endif %}
+                      <div class="container">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="row">                                                        
+                                <div class="col">
+                                    <label for="staticEmail2">Nombre</label>
+                                    <input type="text" id="nombre" name="nombre" class="form-control" value="{{ request.user.first_name }}" disabled>
+                                </div>
+                                <div class="col">
+                                    <label for="staticEmail2">Apellido</label>
+                                    <input type="text" id="apellido" name="apellido" class="form-control" value="{{ request.user.last_name }}" disabled> 
+                                </div>                            
+                            </div>
+                            <br>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="staticEmail2">Usuario</label>
+                                    <input type="text" id="username" name="username" class="form-control" value="{{ request.user.username }}" disabled>
+                                </div>
+                                <div class="col">
+                                    <label for="staticEmail2">Correo</label>
+                                    <input type="text" id="correo" name="correo" class="form-control" value="{{ request.user.email }}" disabled> 
+                                </div> 
+                            </div>
+                            <div class="row" style="margin-left: 15%; margin-top: 2%;">
+                                <div class="col">
+                                    <label for="staticEmail2">Contraseña</label>
+                                    <input type="password" class="form-control" value="*******" disabled>
+                                </div>
+                                <div class="col">
+                                    <br>
+                                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#cambiarContrasena" data-backdrop="static">
+                                        Cambiar Contraseña
+                                    </button>                                 
+                                </div> 
+                            </div>
+                            <br><br><br>
+                            <div class="container" style="margin-left: 37%;">
+                                <button class="btn btn-primary btn-lg" id="btnEditar" type="button" onclick="habilitar()">Editar</button>
+                                <button style="margin-left: 2%;" id="btnGuardar" class="btn btn-success btn-lg" disabled>Guardar</button>
+                            </div>
+                        </form>
+                        <div class="container">
+                               <!-- Modal Cambiar Contraseña-->
+                               <div class="modal fade" id="cambiarContrasena" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalCenterTitle">Cambiar Contraseña</h5>
+                                    <button type="button" class="btn btn-outline-primary" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    </div>
+                                    <form method="POST" action="{% url 'cambiarContrasena' %}" id="theForm">
+                                        {% csrf_token %}
+                                        <div class="modal-body">                                            
+                                            <div class="row">
+                                                <label for="staticEmail2">Contraseña Actual</label>
+                                                <input type="password" id="contrasenaActual" name="contrasenaActual" class="form-control" required="True">
+                                            </div>
+                                            <br>
+                                            <div class="row">
+                                                <label for="staticEmail2">Nueva Contraseña</label>
+                                                <input type="password" id="contrasenaNueva" name="contrasenaNueva" class="form-control" minlength="8" required="True">
+                                            </div>
+                                            <br>
+                                            <div class="row">
+                                                <label for="staticEmail2">Repetir Nueva Contraseña</label>
+                                                <input type="password" id="contrasenaNueva2" name="contrasenaNueva2" class="form-control" minlength="8" required="True">
+                                            </div>
+                                            <br>
+                                            <div class="row">
+                                                <b>
+                                                <label for="staticEmail2">* Al menos una letra en mayúscula y una en minúscula.</label>                                                
+                                                <label for="staticEmail2">* Mínimo 8 caracteres.</label>                                                
+                                                </b>
+                                            </div>                                            
+                                        </div>                                        
+                                    <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                    <button type="button" onclick="validarContrasenas();" id="btnCambiar" class="btn btn-primary">Cambiar</button>                                        
+                                    </form>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div> 
+                </div>
+            </main>            
+        </div>
+            
+        <script>
+            function habilitar(){
+                nombre = document.getElementById("nombre");
+                apellido = document.getElementById("apellido");
+                username = document.getElementById("username");
+                correo = document.getElementById("correo");
 
+                if(nombre.hasAttribute("disabled") || apellido.hasAttribute("disabled") || username.hasAttribute("disabled") || correo.hasAttribute("disabled")){
+                    nombre.removeAttribute("disabled");
+                    apellido.removeAttribute("disabled");
+                    username.removeAttribute("disabled");
+                    correo.removeAttribute("disabled");
+                    document.getElementById("btnGuardar").removeAttribute("disabled");
+                    document.getElementById("btnEditar").textContent = 'Bloquear Datos';
+                }
+                else{
+                    nombre.setAttribute("disabled", true);
+                    apellido.setAttribute("disabled", true);
+                    username.setAttribute("disabled", true);
+                    correo.setAttribute("disabled", true);
+                    document.getElementById("btnGuardar").setAttribute("disabled", true);
+                    document.getElementById("btnEditar").textContent = 'Editar';                    
+                }
+                
+            }
+
+            function validarContrasenas(){
+                actual = document.getElementById("contrasenaActual").value;
+                nueva1 = document.getElementById("contrasenaNueva").value;
+                nueva2 = document.getElementById("contrasenaNueva2").value;
+
+                if(actual == '' || nueva1 == '' || nueva2 == ''){
+                    alert("Por favor llene todos los campos.");
+                }
+                else{
+                    if(nueva1 != nueva2){
+                        alert("Las nuevas contraseñas no coinciden.");
+                    }
+                    else{
+                        document.getElementById("theForm").submit();
+                    }
+                }                
+            }
+        </script>
+
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js">
+        </script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js">
+        </script>
     {% block scripts_cuerpo %}            
     {% endblock %}     
 </body>
