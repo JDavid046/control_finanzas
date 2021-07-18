@@ -1,6 +1,11 @@
 import datetime
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
 import re
+import numpy as np
 from django.contrib.auth.forms import UserCreationForm
+from numpy.random.mtrand import randint
 import xlwt
 import csv
 from django.contrib.auth.models import User
@@ -33,9 +38,6 @@ def user_login(request):
         password = request.POST['password']
 
         user = authenticate(username=username, password=password)
-        print(user)
-        print(username)
-        print(password)
         if user is not None and user.is_active:
             login(request, user)
             return HttpResponseRedirect(reverse('home'))
@@ -71,15 +73,82 @@ def user_register(request):
     return render(request, 'register.html', context)            
 
 
-def olvide_contrasena(request):
-    return render(request, 'password.html')
+def olvide_contrasena(request):    
+    context = {'mensaje':''}
+    try:
+        if request.method == 'POST':
+            correo = request.POST['inputEmail']
+            usuario = User.objects.get(email=correo)
+            nuevaContrasena = crear_random_contrasena()
+            #nuevaContrasena = make_password(nuevaContrasena)
+            #usuario.password = nuevaContrasena
+
+            enviar_correo(nuevaContrasena, correo)
+
+            context = {'mensaje':'Se ha enviado un correo. Por favor revisar e Iniciar Sesión.'}
+    except:
+        context = {'mensaje':'No existe el Usuario con el correo proporcionado.'}
+        
+    return render(request, 'password.html', context)
+
+
+def crear_random_contrasena():
+
+    contrasena_generada = ""
+
+    minusculas = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+    mayusculas = [x.upper() for x in minusculas]
+    numeros = [x for x in range(0,10)]
+    especiales = ['+', '-', '*', '#']
+
+    for x in range(0,3):
+        rand_minus = np.random.randint(len(minusculas))
+        rand_mayus = np.random.randint(len(mayusculas))
+        rand_num = np.random.randint(len(numeros))
+        rand_espe = np.random.randint(len(especiales))
+
+        contrasena_generada += minusculas[rand_minus] + mayusculas[rand_mayus] + str(numeros[rand_num]) + especiales[rand_espe]
+
+    return contrasena_generada
+
+
+def enviar_correo(mensaje, correo):
+    # create message object instance
+    msg = MIMEMultipart()
+    
+    message = "Mis Finanzas App\n\nHola. Has pedido una nueva contraseña.\n\nTu nueva contraseña es: "+ mensaje + "\n\nSi no has pedido un cambio comunicate con administración.\nGracias."
+    
+    # setup the parameters of the message
+    password = "MaestroYagger46*"
+    msg['From'] = "mfinanzasapp@gmail.com"
+    msg['To'] = correo
+    msg['Subject'] = "MisFinanzasApp: Cambio de Contraseña"
+    
+    # add in the message body
+    msg.attach(MIMEText(message, 'plain'))
+    
+    #create server
+    server = smtplib.SMTP('smtp.gmail.com: 587')
+    
+    server.starttls()
+    
+    # Login Credentials for sending the mail
+    server.login(msg['From'], password)
+    
+    
+    # send the message via the server.
+    server.sendmail(msg['From'], msg['To'], msg.as_string())
+    
+    server.quit()
+
+
 
 @login_required
 def home(request):  
-    ingresosUser = Movimiento.objects.filter(tipoMovimiento=1).aggregate(Sum('valorMovimiento'))
+    ingresosUser = Movimiento.objects.filter(usuario=request.user,tipoMovimiento=1).aggregate(Sum('valorMovimiento'))
     ingresos = format(0,".3f") if ingresosUser['valorMovimiento__sum']==None else ingresosUser['valorMovimiento__sum']
 
-    egresosUser = Movimiento.objects.filter(tipoMovimiento=2).aggregate(Sum('valorMovimiento'))
+    egresosUser = Movimiento.objects.filter(usuario=request.user,tipoMovimiento=2).aggregate(Sum('valorMovimiento'))
     egresos = format(0,".3f") if egresosUser['valorMovimiento__sum'] == None else egresosUser['valorMovimiento__sum']    
 
     context = {
