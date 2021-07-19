@@ -23,6 +23,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from .forms import MovimientoForm, UserLoginForm, UserRegisterForm
 from django.contrib.auth import get_user_model
+from django.db.models.functions import Extract
 
 
 def logout_view(request):
@@ -65,8 +66,7 @@ def user_register(request):
             User = get_user_model()
             User.objects.create_user(username=username, email=email,password=password)
             authenticated_user = authenticate(username=username, email=email,password=password)
-            login(request, authenticated_user)
-            #form.save()
+            login(request, authenticated_user)            
             return HttpResponseRedirect(reverse('home'))
 
     context = {'form': form}
@@ -80,8 +80,9 @@ def olvide_contrasena(request):
             correo = request.POST['inputEmail']
             usuario = User.objects.get(email=correo)
             nuevaContrasena = crear_random_contrasena()
-            #nuevaContrasena = make_password(nuevaContrasena)
-            #usuario.password = nuevaContrasena
+            contrasena_hashed = make_password(nuevaContrasena)            
+            usuario.password = contrasena_hashed
+            usuario.save()
 
             enviar_correo(nuevaContrasena, correo)
 
@@ -149,12 +150,39 @@ def home(request):
     ingresos = format(0,".3f") if ingresosUser['valorMovimiento__sum']==None else ingresosUser['valorMovimiento__sum']
 
     egresosUser = Movimiento.objects.filter(usuario=request.user,tipoMovimiento=2).aggregate(Sum('valorMovimiento'))
-    egresos = format(0,".3f") if egresosUser['valorMovimiento__sum'] == None else egresosUser['valorMovimiento__sum']    
+    egresos = format(0,".3f") if egresosUser['valorMovimiento__sum'] == None else egresosUser['valorMovimiento__sum']
+
+
+    # Cálculo de ingresos por Mes
+    ingresos_por_mes_query = Movimiento.objects.filter(usuario=request.user,tipoMovimiento=1).annotate(totalIngresos=Sum('valorMovimiento'),month=Extract('fechaMovimiento', 'month')).values('totalIngresos', 'month').order_by('month')
+    ingresos_por_mes = [0 for x in range(1,13)]    
+    
+    for x in range(len(ingresos_por_mes_query)):
+        objeto = ingresos_por_mes[ingresos_por_mes_query[x]['month']-1]    
+        if objeto != 0:
+            ingresos_por_mes[ingresos_por_mes_query[x]['month']-1] = objeto + float(ingresos_por_mes_query[x]['totalIngresos'])
+        else:
+            ingresos_por_mes[ingresos_por_mes_query[x]['month']-1] = float(ingresos_por_mes_query[x]['totalIngresos'])
+
+
+    # Cálculo de Egresos por mes
+    egresos_por_mes_query = Movimiento.objects.filter(usuario=request.user,tipoMovimiento=2).annotate(totalIngresos=Sum('valorMovimiento'),month=Extract('fechaMovimiento', 'month')).values('totalIngresos', 'month').order_by('month')
+    egresos_por_mes = [0 for x in range(1,13)]    
+    
+    for x in range(len(egresos_por_mes_query)):
+        objeto = egresos_por_mes[egresos_por_mes_query[x]['month']-1]    
+        if objeto != 0:
+            egresos_por_mes[egresos_por_mes_query[x]['month']-1] = objeto + float(egresos_por_mes_query[x]['totalIngresos'])
+        else:
+            egresos_por_mes[egresos_por_mes_query[x]['month']-1] = float(egresos_por_mes_query[x]['totalIngresos'])
 
     context = {
         'ingresos':ingresos,
-        'egresos':egresos
+        'egresos':egresos,
+        'ingresos_por_mes':ingresos_por_mes,
+        'egresos_por_mes':egresos_por_mes,
     }    
+
     return render(request, 'index.html', context)    
 
 @login_required
