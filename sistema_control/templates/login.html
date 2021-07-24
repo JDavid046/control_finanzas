@@ -21,22 +21,15 @@
                                <div class="card-body">
                                    <form method="POST">
                                      {% csrf_token %}
-                                     {{ form.as_p }}
-                                       <!--<div class="form-floating mb-3">
-                                           <input class="form-control" id="inputEmail" type="email" placeholder="name@example.com" />
-                                           <label for="inputEmail">Email address</label>
-                                       </div>
-                                       <div class="form-floating mb-3">
-                                           <input class="form-control" id="inputPassword" type="password" placeholder="Password" />
-                                           <label for="inputPassword">Password</label>
-                                       </div>
-                                       <div class="form-check mb-3">
-                                           <input class="form-check-input" id="inputRememberPassword" type="checkbox" value="" />
-                                           <label class="form-check-label" for="inputRememberPassword">Remember Password</label>
-                                       </div>-->
+                                     {{ form.as_p }}                                       
                                        <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
-                                           <a class="small" href="{% url 'password' %}">Olvidaste tu Contraseña?</a>
-                                           <button class="btn btn-primary" type="submit" id="submit">Login</button>                                                
+                                            <div class="container" class='row'>
+                                                <a class="small" href="{% url 'credentials' 'usuario' %}">Olvidaste tu Usuario?</a>  
+                                                <br>                                              
+                                                <a class="small" href="{% url 'credentials' 'password' %}">Olvidaste tu Contraseña?</a>
+                                            </div>
+                                                                                                                         
+                                            <button class="btn btn-primary" type="submit" id="submit">Login</button>                                                
                                        </div>
                                    </form>
                                </div>

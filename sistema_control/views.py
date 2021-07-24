@@ -1,7 +1,7 @@
 import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import smtplib
+import smtplib, ssl
 import re
 import numpy as np
 from django.contrib.auth.forms import UserCreationForm
@@ -73,24 +73,52 @@ def user_register(request):
     return render(request, 'register.html', context)            
 
 
-def olvide_contrasena(request):    
-    context = {'mensaje':''}
+def olvide_credenciales(request,accion):
+    if accion=='password':    
+        context = {
+            'mensaje':'',
+            'titulo':'Recuperar Contraseña',
+            'descripcion':'la contraseña.'
+        }
+    else:
+        context = {
+            'mensaje':'',
+            'titulo':'Recuperar Usuario',
+            'descripcion':'el usuario.'
+        }        
     try:
         if request.method == 'POST':
             correo = request.POST['inputEmail']
             usuario = User.objects.get(email=correo)
-            nuevaContrasena = crear_random_contrasena()
-            contrasena_hashed = make_password(nuevaContrasena)            
-            usuario.password = contrasena_hashed
-            usuario.save()
 
-            enviar_correo(nuevaContrasena, correo)
+            if accion =='password':
+                nuevaContrasena = crear_random_contrasena()
+                contrasena_hashed = make_password(nuevaContrasena)            
+                usuario.password = contrasena_hashed
+                usuario.save()
+
+                params = {
+                    'subject':'Cambio de Contraseña',
+                    'mensaje':'un cambio de contraseña.',
+                    'mensaje2': 'Tu nueva contraseña es: <b>'+nuevaContrasena+'</b>.<br>Si no has pedido un cambio de contraseña, contacta con el administrador.'
+                }
+
+                enviar_correo(params, correo)
+
+            else:
+                params = {
+                    'subject':'Recuperación Usuario',
+                    'mensaje':'recordar tu Usuario.',
+                    'mensaje2': 'Tu Usuario es: <b>'+usuario.username+'</b>.<br>Si no has pedido recordar el Usuario, contacta con el administrador.'
+                }
+
+                enviar_correo(params, correo)
 
             context = {'mensaje':'Se ha enviado un correo. Por favor revisar e Iniciar Sesión.'}
     except:
         context = {'mensaje':'No existe el Usuario con el correo proporcionado.'}
         
-    return render(request, 'password.html', context)
+    return render(request, 'credentials.html', context)
 
 
 def crear_random_contrasena():
@@ -113,34 +141,60 @@ def crear_random_contrasena():
     return contrasena_generada
 
 
-def enviar_correo(mensaje, correo):
-    # create message object instance
-    msg = MIMEMultipart()
-    
-    message = "Mis Finanzas App\n\nHola. Has pedido una nueva contraseña.\n\nTu nueva contraseña es: "+ mensaje + "\n\nSi no has pedido un cambio comunicate con administración.\nGracias."
-    
-    # setup the parameters of the message
+def enviar_correo(mensaje, correo):    
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+
+    sender_email = "mfinanzasapp@gmail.com"
+    receiver_email = correo
     password = "MaestroYagger46*"
-    msg['From'] = "mfinanzasapp@gmail.com"
-    msg['To'] = correo
-    msg['Subject'] = "MisFinanzasApp: Cambio de Contraseña"
-    
-    # add in the message body
-    msg.attach(MIMEText(message, 'plain'))
-    
-    #create server
-    server = smtplib.SMTP('smtp.gmail.com: 587')
-    
-    server.starttls()
-    
-    # Login Credentials for sending the mail
-    server.login(msg['From'], password)
-    
-    
-    # send the message via the server.
-    server.sendmail(msg['From'], msg['To'], msg.as_string())
-    
-    server.quit()
+
+    message = MIMEMultipart("alternative")
+    message["Subject"] = mensaje['subject']
+    message["From"] = sender_email
+    message["To"] = receiver_email
+
+    # Create the plain-text and HTML version of your message
+    html = """\
+    <!doctype html>
+    <html lang="es">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+
+    </head>
+    <body>
+    <div class="bg-black">
+        <div class="container">      
+        <h1 class="ax-center text-white text-center mb-10">Hola.<br>Has pedido """+ mensaje['mensaje'] +"""</h1>      
+        <p class="ax-center max-w-96 lh-lg text-white text-center text-2xl mb-10">
+            """+mensaje['mensaje2']+"""
+        </p>      
+        </div>
+    </div>  
+    </body>
+    </html>
+    """
+
+    # Turn these into plain/html MIMEText objects
+    part = MIMEText(html, "html")
+
+    # Add HTML/plain-text parts to MIMEMultipart message
+    # The email client will try to render the last part first
+    message.attach(part)
+
+    # Create secure connection with server and send email
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(
+            sender_email, receiver_email, message.as_string()
+        )
 
 
 
