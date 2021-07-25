@@ -1,1 +1,1 @@
-web:gunicorn sistema_control_finanzas.wsgi
+web: gunicorn sistema_control_finanzas.wsgi
