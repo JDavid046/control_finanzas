@@ -52,5 +52,5 @@ class MovimientoForm(forms.ModelForm):
         widgets = {
             'tipoMovimiento': forms.Select(attrs={'class':'form-select'}),
             'descripcionMovimiento': forms.Textarea(attrs={'class':'form-control'}),
-            'valorMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'0'}),            
+            'valorMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'50'}),            
         }
