@@ -19,4 +19,4 @@ DATABASES = {
     }
 }
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, '/sistema_control/static'))
+STATICFILES_DIRS = (os.path.join(BASE_DIR, '/sistema_control/static'),)
