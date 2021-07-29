@@ -33,7 +33,7 @@ def logout_view(request):
 def user_login(request):
     if request.method != 'POST':
         if request.user.is_authenticated():
-            return render(request,'index.html')
+            return HttpResponseRedirect(reverse('home'))
         else:
             form = UserLoginForm()
 
