@@ -15,6 +15,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sistema_control_finanzas.settin
 
 #application = get_wsgi_application()
 
-from dj_static import  Cling
+from dj_static import Cling
 
 application = Cling(get_wsgi_application())
