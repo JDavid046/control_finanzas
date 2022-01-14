@@ -1,7 +1,8 @@
 {% extends 'layout.html' %}
 {% load static %}
 {% block titulo %}Inicio{% endblock %}
-{% block icono %}<link rel="icon" href="https://img.icons8.com/cotton/64/000000/coin-wallet--v6.png">{% endblock %}
+{% block icono %}
+<link rel="icon" href="https://img.icons8.com/cotton/64/000000/coin-wallet--v6.png">{% endblock %}
 
 {% block head %}
 <script src="{% static 'code/highcharts.js' %}"></script>
@@ -13,23 +14,29 @@
 
 {% block cuerpo %}
 {% load humanize %}
+
 <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <!-- Navbar Brand-->
-        <a class="navbar-brand ps-3" href="{% url 'home' %}">Mis Finanzas<i class="fas fa-hand-holding-usd" style="margin-left: 20;"></i></a>        
+        <a class="navbar-brand ps-3" href="{% url 'home' %}">Mis Finanzas<i class="fas fa-hand-holding-usd"
+                style="margin-left: 20;"></i></a>
         <!-- Sidebar Toggle-->
-        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
+                class="fas fa-bars"></i></button>
         <!-- Navbar Search-->
         <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-            
+
         </form>
         <!-- Navbar-->
         <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown"
+                    aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="{% url 'perfil' %}">Perfil</a></li>                    
-                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="{% url 'perfil' %}">Perfil</a></li>
+                    <li>
+                        <hr class="dropdown-divider" />
+                    </li>
                     <li><a class="dropdown-item" href="{% url 'logout' %}">Cerrar Sesión</a></li>
                 </ul>
             </li>
@@ -72,182 +79,252 @@
             <main>
                 <div class="container-fluid px-4">
                     <h1 class="mt-4">Reporte General</h1>
-                    <ol class="breadcrumb mb-4">                        
+                    <ol class="breadcrumb mb-4">
                     </ol>
                     <div class="row">
                         <div class="col-xl-4 col-md-6">
                             <div class="card bg-primary text-white mb-4">
                                 <div class="card-body"><b>Capital Total</b>
-                                <br>                            
-                                <h2>{{request.user.profile.capitalTotal|intcomma}}</h2>    
+                                    <br>
+                                    <h2>{{request.user.profile.capitalTotal|intcomma}}</h2>
                                 </div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="{% url 'movimientos' %}">Ver Detalles</a>                                    
+                                    <a class="small text-white stretched-link" href="{% url 'movimientos' %}">Ver
+                                        Detalles</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-xl-4 col-md-6">
                             <div class="card bg-success text-white mb-4">
-                                <div class="card-body"><b>Ingresos</b>                                    
-                                <h2>{{ingresos|intcomma}}</h2>   
-                                    </div>
+                                <div class="card-body"><b>Ingresos</b>
+                                    <h2>{{ingresos|intcomma}}</h2>
+                                </div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="{% url 'ingresos' %}">Ver Detalles</a>
+                                    <a class="small text-white stretched-link" href="{% url 'ingresos' %}">Ver
+                                        Detalles</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-xl-4 col-md-6">
                             <div class="card bg-dark text-white mb-4">
-                                <div class="card-body"><b>Egresos</b>                                
-                                <h2>{{egresos|intcomma}}</h2>   
-                                    </div>
+                                <div class="card-body"><b>Egresos</b>
+                                    <h2>{{egresos|intcomma}}</h2>
+                                </div>
                                 <div class="card-footer d-flex align-items-center justify-content-between">
-                                    <a class="small text-white stretched-link" href="{% url 'egresos' %}">Ver Detalles</a>
+                                    <a class="small text-white stretched-link" href="{% url 'egresos' %}">Ver
+                                        Detalles</a>
                                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                 </div>
                             </div>
-                        </div>                        
-                    </div>                        
-                    </div>
-                    <div class="row">
-                        <div class="col-xl-6">
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <i class="fas fa-chart-bar me-1"></i>
-                                    Ingresos por Mes                                    
-                                </div>
-                                <div id="containerIngresos"></div>
-                            </div>
-                        </div>
-                        <div class="col-xl-6">
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <i class="fas fa-chart-bar me-1"></i>
-                                    Egresos por Mes
-                                </div>
-                                <div id="containerEgresos"></div>
-                            </div>
-                        </div>
-                    </div>          
                         </div>
                     </div>
                 </div>
-            </main>            
+                <div class="row" style="margin-left: 2%; display: flex;">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <p>Seleccione año a mostrar en las gráficas:</p>
+                        <div class="col" style="flex: 50%; padding: 10px;">
+                            <select class="form-select" aria-label="Default select example" name="year" id="year"
+                                onchange="this.form.submit()">
+
+                                {% if theYear %}
+                                <option selected>{{ theYear }}</option>
+                                {% else %}
+                                <option selected>{{ years.0 }}</option>
+                                {% endif %}
+
+
+                                {% for year in years %}
+                                <option name="year" value="{{ year }}">
+                                    {{ year }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-xl-6">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-chart-bar me-1"></i>
+                                Ingresos por Mes
+                            </div>
+                            <div id="containerIngresos"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-chart-bar me-1"></i>
+                                Egresos por Mes
+                            </div>
+                            <div id="containerEgresos"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-chart-bar me-1"></i>
+                                Capital por Mes
+                            </div>
+                            <div id="containerCapital"></div>
+                        </div>
+                    </div>
+                </div>
         </div>
+    </div>
+    </div>
+    </main>
+    </div>
     </div>
 
     <script type="application/javascript">
         Highcharts.chart('containerIngresos', {
-        chart: {
-            type: 'column'
-        },
-        title: {
-            text: 'Ingresos por Mes'
-        },
-        xAxis: {
-            categories: [
-                'Enero',
-                'Febrero',
-                'Marzo',
-                'Abril',
-                'Mayo',
-                'Junio',
-                'Julio',
-                'Agosto',
-                'Septiemebre',
-                'Octubre',
-                'Noviembre',
-                'Diciembre'
-            ],
-            crosshair: true
-        },
-        yAxis: {
-            min: 0,
+            chart: {
+                type: 'column'
+            },
             title: {
-                text: '$ Valor (Pesos Colombianos)'
-            }
-        },
-        tooltip: {
-            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
-            pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
-                '<td style="padding:0"><b>{point.y:,.2f} pesos</b></td></tr>',
-            footerFormat: '</table>',
-            shared: true,
-            useHTML: true
-        },
-        plotOptions: {
-            column: {
-                pointPadding: 0.2,
-                borderWidth: 0
-            }
-        },
-        series: [{
-            name: 'Total de Ingresos',
-            showInLegend: false,
-            data: {{ ingresos_por_mes }}
+                text: 'Ingresos por Mes'
+            },
+            xAxis: {
+                categories: [
+                    'Enero',
+                    'Febrero',
+                    'Marzo',
+                    'Abril',
+                    'Mayo',
+                    'Junio',
+                    'Julio',
+                    'Agosto',
+                    'Septiemebre',
+                    'Octubre',
+                    'Noviembre',
+                    'Diciembre'
+                ],
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: '$ Valor (Pesos Colombianos)'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:,.2f} pesos</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{
+                name: 'Total de Ingresos',
+                showInLegend: true,
+                data: {{ ingresos_por_mes }}
 
         }]
     });
     </script>
 
 
-<script type="application/javascript">
-    Highcharts.chart('containerEgresos', {
-    chart: {
-        type: 'column'
-    },
-    title: {
-        text: 'Egresos por Mes'
-    },
-    xAxis: {
-        categories: [
-            'Enero',
-            'Febrero',
-            'Marzo',
-            'Abril',
-            'Mayo',
-            'Junio',
-            'Julio',
-            'Agosto',
-            'Septiemebre',
-            'Octubre',
-            'Noviembre',
-            'Diciembre'
-        ],
-        crosshair: true
-    },
-    yAxis: {
-        min: 0,
-        title: {
-            text: '$ Valor (Pesos Colombianos)'
-        }
-    },
-    tooltip: {
-        headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
-        pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
-            '<td style="padding:0"><b>{point.y:,.2f} pesos</b></td></tr>',
-        footerFormat: '</table>',
-        shared: true,
-        useHTML: true
-    },
-    plotOptions: {
-        column: {
-            pointPadding: 0.2,
-            borderWidth: 0
-        }
-    },
-    series: [{
-        name: 'Total de Ingresos',
-        showInLegend: false,
-        data: {{ egresos_por_mes|intcomma }}
+    <script type="application/javascript">
+        Highcharts.chart('containerEgresos', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Egresos por Mes'
+            },
+            xAxis: {
+                categories: [
+                    'Enero',
+                    'Febrero',
+                    'Marzo',
+                    'Abril',
+                    'Mayo',
+                    'Junio',
+                    'Julio',
+                    'Agosto',
+                    'Septiemebre',
+                    'Octubre',
+                    'Noviembre',
+                    'Diciembre'
+                ],
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: '$ Valor (Pesos Colombianos)'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:,.2f} pesos</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{
+                name: 'Total de Ingresos',
+                showInLegend: false,
+                data: {{ egresos_por_mes| intcomma }}
 
     }]
 });
-</script>
+    </script>
 
-    {% block scripts_cuerpo %}            
-    {% endblock %}     
+    <script type="application/javascript">
+        Highcharts.chart('containerCapital', {
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: 'Capital Total por Mes'
+            },
+            xAxis: {
+                categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dec']
+            },
+            yAxis: {
+                title: {
+                    text: '$ Valor (Pesos Colombianos)'
+                }
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: true
+                }
+            },
+            series: [{
+                name: 'Capital',
+                data: {{ capital_por_mes| intcomma }}
+            }]
+        });
+    </script>
+
+    {% block scripts_cuerpo %}
+    {% endblock %}
 </body>
 {% endblock %}

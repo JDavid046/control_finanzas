@@ -116,25 +116,23 @@
                         <div class="card-body">
                             <table id="datatablesSimple">
                                 <thead>
-                                    <tr>
-                                        <th>ID</th>
+                                    <tr>                               
+                                        <th>Fecha Movimiento</th>         
                                         <th>Valor Movimiento</th>
                                         <th>Tipo Movimiento</th>
-                                        <th>Descripción Movimiento</th>
-                                        <th>Fecha Movimiento</th>
+                                        <th>Descripción Movimiento</th>                                        
                                         <th colspan="2">Opciones</th>                                        
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% load humanize %}
                                     {% for movimiento in movimientos %}
-                                    <tr>                                        
-                                        <td>{{ movimiento.id }}</td>
+                                    <tr>                                               
+                                        <td>{{ movimiento.fechaMovimiento }}</td>                                 
                                         <td>{{ movimiento.valorMovimiento|intcomma }}</td>
                                         <td>{{ movimiento.tipoMovimiento }}</td>
-                                        <td>{{ movimiento.descripcionMovimiento }}</td>
-                                        <td>{{ movimiento.fechaMovimiento }}</td>
-                                        <td><a href="{% url 'editarMovimiento' movimiento.id %}" class="btn btn-success">Editar</a></td>
+                                        <td>{{ movimiento.descripcionMovimiento }}</td>                                        
+                                        <!--<td><a href="{% url 'editarMovimiento' movimiento.id %}" class="btn btn-success">Editar</a></td>-->
                                         <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#eliminarModal{{movimiento.id}}">Eliminar</button></td>
                                     </tr>
 

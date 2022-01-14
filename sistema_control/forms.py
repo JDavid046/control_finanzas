@@ -40,17 +40,21 @@ class UserLoginForm(forms.ModelForm):
         help_texts = {k:"" for k in fields }
 
 
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
 class MovimientoForm(forms.ModelForm):
 
     AVAILABLE_YEAR_CHOICES = list(range(2010, datetime.date.today().year+1))
-    fechaMovimiento = forms.DateField(initial=datetime.date.today(), widget=forms.SelectDateWidget(years=AVAILABLE_YEAR_CHOICES))
+    #fechaMovimiento = forms.DateField(initial=datetime.date.today(), widget=forms.SelectDateWidget(years=AVAILABLE_YEAR_CHOICES))
 
     class Meta:
         model = Movimiento
-        fields = ['tipoMovimiento', 'descripcionMovimiento', 'valorMovimiento']
+        fields = ['tipoMovimiento', 'descripcionMovimiento', 'valorMovimiento', 'fechaMovimiento']
 
         widgets = {
             'tipoMovimiento': forms.Select(attrs={'class':'form-select'}),
             'descripcionMovimiento': forms.Textarea(attrs={'class':'form-control'}),
-            'valorMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'50'}),            
+            'valorMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'50'}),   
+            'fechaMovimiento': DateInput(),
         }
