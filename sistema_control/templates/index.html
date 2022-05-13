@@ -79,6 +79,32 @@
             <main>
                 <div class="container-fluid px-4">
                     <h1 class="mt-4">Reporte General</h1>
+                    <br>
+                    <div class="row" style="margin-left: 2%; display: flex;">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <p>Seleccione año a mostrar en los reportes:</p>
+                            <div class="col" style="flex: 50%; padding: 10px;">
+                                <select class="form-select" aria-label="Default select example" name="year" id="year"
+                                    onchange="this.form.submit()">
+    
+                                    {% if theYear %}
+                                    <option selected>{{ theYear }}</option>
+                                    {% else %}
+                                    <option selected>{{ years.0 }}</option>
+                                    {% endif %}
+    
+    
+                                    {% for year in years %}
+                                    <option name="year" value="{{ year }}">
+                                        {{ year }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    
                     <ol class="breadcrumb mb-4">
                     </ol>
                     <div class="row">
@@ -120,32 +146,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="row" style="margin-left: 2%; display: flex;">
-                    <form method="POST">
-                        {% csrf_token %}
-                        <p>Seleccione año a mostrar en las gráficas:</p>
-                        <div class="col" style="flex: 50%; padding: 10px;">
-                            <select class="form-select" aria-label="Default select example" name="year" id="year"
-                                onchange="this.form.submit()">
-
-                                {% if theYear %}
-                                <option selected>{{ theYear }}</option>
-                                {% else %}
-                                <option selected>{{ years.0 }}</option>
-                                {% endif %}
-
-
-                                {% for year in years %}
-                                <option name="year" value="{{ year }}">
-                                    {{ year }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <br>
+                </div>                
                 <div class="row">
                     <div class="col-xl-6">
                         <div class="card mb-4">

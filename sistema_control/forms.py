@@ -58,3 +58,4 @@ class MovimientoForm(forms.ModelForm):
             'valorMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'50'}),   
             'fechaMovimiento': DateInput(),
         }
+        

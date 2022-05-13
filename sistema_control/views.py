@@ -249,7 +249,7 @@ def enviar_correo(mensaje, correo):
 def home(request):
     if request.method != "POST":
         ingresosUser = Movimiento.objects.filter(
-            usuario=request.user, tipoMovimiento=1
+            usuario=request.user, tipoMovimiento=1, fechaMovimiento__contains=datetime.date.today().year
         ).aggregate(Sum("valorMovimiento"))
         ingresos = (
             format(0, ".3f")
@@ -258,7 +258,7 @@ def home(request):
         )
 
         egresosUser = Movimiento.objects.filter(
-            usuario=request.user, tipoMovimiento=2
+            usuario=request.user, tipoMovimiento=2, fechaMovimiento__contains=datetime.date.today().year
         ).aggregate(Sum("valorMovimiento"))
         egresos = (
             format(0, ".3f")
@@ -289,7 +289,7 @@ def home(request):
         theYear = request.POST.get("year")
 
         ingresosUser = Movimiento.objects.filter(
-            usuario=request.user, tipoMovimiento=1
+            usuario=request.user, tipoMovimiento=1, fechaMovimiento__contains=theYear
         ).aggregate(Sum("valorMovimiento"))
         ingresos = (
             format(0, ".3f")
@@ -298,7 +298,7 @@ def home(request):
         )
 
         egresosUser = Movimiento.objects.filter(
-            usuario=request.user, tipoMovimiento=2
+            usuario=request.user, tipoMovimiento=2, fechaMovimiento__contains=theYear
         ).aggregate(Sum("valorMovimiento"))
         egresos = (
             format(0, ".3f")
