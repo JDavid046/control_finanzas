@@ -73,7 +73,7 @@
                     </ol>
                     {% if errores == True %}
                         <div class="alert alert-dark" role="alert">
-                            <b>Error.</b> No se puede agregar Egreso Superior al Capital Total.
+                            <b>Error.</b> {{ mensaje }}.
                         </div>
                         {% endif %}
                     <div class="card mb-4">                        
@@ -84,7 +84,8 @@
                                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#agregarMovimiento" data-backdrop="static">
                                     Agregar Movimiento
                                 </button>                                
-                                <a href="{% url 'export-excel' nombre='Movimientos' %}" class="btn btn-outline-warning"><i class="fas fa-download"></i></a>
+                                <a href="{% url 'export-excel' nombre='Movimientos' %}" class="btn btn-outline-warning">Descargar Movimientos <i class="fas fa-download"></i></a>
+                                <a type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#uploadCsv" data-backdrop="static">Subir Movimientos <i class="fas fa-upload"></i></a>
                                 
                                 <!-- Modal Agregar-->
                                 <div class="modal fade" id="agregarMovimiento" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -108,7 +109,43 @@
                                         </div>
                                     </div>
                                     </div>
-                                </div>                                                                                                                                  
+                                </div>  
+                                <!--Fin Modal Agregar-->
+                                
+                                <!-- Modal Upload CSV -->                                
+                                <div class="modal fade" id="uploadCsv" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalCenterTitle">Subir Movimientos</h5>
+                                        <button type="button" class="btn btn-outline-primary" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                        <form action="{% url 'upload-excel' %}" method="POST" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            <div class="modal-body">
+                                                Recomendación:
+                                                <br><br>
+                                                El archivo debe ser <b>.csv</b> y debe tener la siguiente estructura:
+                                                <br><br>
+                                                1. Debe tener 4 columnas correspondientes a el Tipo de Movimiento, la Descripción del Movimiento, el Valor del Movimiento, y la Fecha del Movimiento.
+                                                <br><br>
+                                                2. Cada columna debe estar delimitada por una <strong>coma (,)</strong>.
+                                                <br><br>
+                                                <strong>Importante: </strong>En el tipo de Movimiento los ingresos corresponden al número 1 y los Egresos al número 2.
+                                                <br><br>
+                                                <input type="file" name="csv_file" accept=".csv"></input>
+                                            </div>                                        
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                                <button class="btn btn-primary">Subir</button>                                            
+                                            </div>
+                                        </form>
+                                    </div>
+                                    </div>
+                                </div>
+                                <!-- Fin Modal Uploda CSV -->
                               </div>
                         </div>
                     </div>                

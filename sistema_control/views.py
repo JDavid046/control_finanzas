@@ -249,7 +249,7 @@ def enviar_correo(mensaje, correo):
 def home(request):
     if request.method != "POST":
         ingresosUser = Movimiento.objects.filter(
-            usuario=request.user, tipoMovimiento=1
+            usuario=request.user, tipoMovimiento=1, fechaMovimiento__contains=datetime.date.today().year
         ).aggregate(Sum("valorMovimiento"))
         ingresos = (
             format(0, ".3f")
@@ -258,7 +258,7 @@ def home(request):
         )
 
         egresosUser = Movimiento.objects.filter(
-            usuario=request.user, tipoMovimiento=2
+            usuario=request.user, tipoMovimiento=2, fechaMovimiento__contains=datetime.date.today().year
         ).aggregate(Sum("valorMovimiento"))
         egresos = (
             format(0, ".3f")
@@ -289,7 +289,7 @@ def home(request):
         theYear = request.POST.get("year")
 
         ingresosUser = Movimiento.objects.filter(
-            usuario=request.user, tipoMovimiento=1
+            usuario=request.user, tipoMovimiento=1, fechaMovimiento__contains=theYear
         ).aggregate(Sum("valorMovimiento"))
         ingresos = (
             format(0, ".3f")
@@ -298,7 +298,7 @@ def home(request):
         )
 
         egresosUser = Movimiento.objects.filter(
-            usuario=request.user, tipoMovimiento=2
+            usuario=request.user, tipoMovimiento=2, fechaMovimiento__contains=theYear
         ).aggregate(Sum("valorMovimiento"))
         egresos = (
             format(0, ".3f")
@@ -398,8 +398,7 @@ def obtener_capital_por_mes(request, year):
 
     capital_por_mes = [0 for x in range(1, 13)]
 
-    for x in range(len(capital)):
-        print(capital[x][0])
+    for x in range(len(capital)):        
         capital_por_mes[int(capital[x][0])-1] = float(capital[x][1])        
     
     return capital_por_mes
@@ -457,9 +456,7 @@ def movimientos_usuario(request):
     return render(request, "movimientos.html", context)
 
 
-def calculoNuevoCapital(
-    usuario, valorMovimiento, tipoMovimiento, accion, valorAnterior
-):
+def calculoNuevoCapital(usuario, valorMovimiento, tipoMovimiento, accion, valorAnterior):
     estatus = False
     nuevoCapital = 0
 
@@ -593,7 +590,7 @@ def egresos_usuario(request):
 
 
 def export_excel(request, nombre):
-    response = HttpResponse(content_type="application/ms-excel")
+    response = HttpResponse(content_type="text/csv")
 
     response["Content-Disposition"] = (
         'attachment; filename="'
@@ -602,8 +599,11 @@ def export_excel(request, nombre):
         + request.user.username
         + " "
         + str(datetime.datetime.now())
-        + ".xls"
+        + ".csv"
     )
+
+    writer = csv.writer(response)
+
 
     wb = xlwt.Workbook(encoding="UTF-8")
     ws = wb.add_sheet(nombre)
@@ -618,8 +618,10 @@ def export_excel(request, nombre):
         "Fecha del movimiento",
     ]
 
-    for col_num in range(len(columns)):
-        ws.write(row_num, col_num, columns[col_num], font_style)
+    writer.writerow(['Tipo de Movimiento','Descripcion del Movimiento','Valor del Movimiento','Fecha del Movimiento'])
+
+    #for col_num in range(len(columns)):
+        #ws.write(row_num, col_num, columns[col_num], font_style)        
 
     font_style = xlwt.XFStyle()
 
@@ -660,13 +662,87 @@ def export_excel(request, nombre):
         rows = switch_tabla["egreso"]
 
     for row in rows:
-        row_num += 1
+        writer.writerow([str(row[0]), str(row[1]),str(row[2]),str(row[3])])
+        """row_num += 1
 
         for col_num in range(len(row)):
-            ws.write(row_num, col_num, str(row[col_num]), font_style)
-    wb.save(response)
+            ws.write(row_num, col_num, str(row[col_num]), font_style)"""
+    #wb.save(response)
 
     return response
+
+
+def upload_excel(request):
+    usuario = User.objects.get(id=request.user.id)
+    data = {}
+    if "POST" == request.method:
+        
+        try:
+            csv_file = request.FILES["csv_file"]
+            if not csv_file.name.endswith('.csv'):
+                movimientoForm = MovimientoForm()
+                movimientos = Movimiento.objects.filter(usuario=request.user)
+                context = {
+                        "movimientos": movimientos,
+                        "mensaje": "El archivo debe ser un archivo .csv",
+                        "errores": True,
+                        "form": movimientoForm
+                    }
+                
+            #if file is too large, return
+            elif csv_file.multiple_chunks():
+                movimientoForm = MovimientoForm()
+                movimientos = Movimiento.objects.filter(usuario=request.user)
+                context = {
+                        "movimientos": movimientos,
+                        "mensaje": "El archivo supera el peso permitido.",
+                        "errores": True,
+                        "form": movimientoForm
+                    }
+            else:
+                
+                file_data = csv_file.read().decode("utf-8")
+                
+                lines = file_data.split("\n")[1:]
+                
+                for line in lines:
+                    fields = line.split(",")
+                    data_dict = {}
+                    data_dict["tipoMovimiento"] = fields[0]
+                    data_dict["descripcionMovimiento"] = fields[1]
+                    data_dict["valorMovimiento"] = fields[2]
+                    data_dict["fechaMovimiento"] = str(fields[3]).strip()
+                    data_dict["usuario"] = usuario
+                    
+                    try:
+                        form = MovimientoForm(data_dict)                
+                        if form.is_valid():
+                            calculo = calculoNuevoCapital(
+                            request.user,
+                            int(data_dict["valorMovimiento"].split('.')[0]),
+                            int(data_dict["tipoMovimiento"]),
+                            "nuevo",
+                            None,
+                        )
+                        if calculo:
+
+                            Movimiento.objects.create(
+                                descripcionMovimiento=data_dict["descripcionMovimiento"],
+                                fechaMovimiento=data_dict["fechaMovimiento"],
+                                tipoMovimiento = TipoMovimiento.objects.get(id=data_dict["tipoMovimiento"]),
+                                usuario=data_dict["usuario"],
+                                valorMovimiento=data_dict["valorMovimiento"]
+                            )
+
+                            return HttpResponseRedirect(reverse("movimientos"))
+
+                    except Exception as e:                
+                        pass
+                
+        except Exception as e:
+            pass
+            
+    return render(request, "movimientos.html", context)
 
 
 @login_required
