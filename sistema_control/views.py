@@ -1,9 +1,7 @@
 import datetime
 from datetime import date
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-import smtplib, ssl
 import re
+from django.conf import settings
 from django.db.models import query
 import numpy as np
 from django.contrib.auth.forms import UserCreationForm
@@ -27,6 +25,8 @@ from .forms import MovimientoForm, UserLoginForm, UserRegisterForm
 from django.contrib.auth import get_user_model
 from django.db.models.functions import Extract
 from django.db import connection
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
 
 
 def logout_view(request):
@@ -106,9 +106,9 @@ def olvide_credenciales(request, accion):
                 params = {
                     "subject": "Cambio de Contraseña",
                     "mensaje": "un cambio de contraseña.",
-                    "mensaje2": "Tu nueva contraseña es: <b>"
-                    + nuevaContrasena
-                    + "</b><br>Si no has pedido un cambio de contraseña, contacta con el administrador.",
+                    "mensaje2": "Tu nueva contraseña es: ",
+                    "mensaje3": nuevaContrasena,
+                    "advertencia": "Si no has pedido un cambio de contraseña, contacta con el administrador."
                 }
 
                 enviar_correo(params, correo)
@@ -117,9 +117,9 @@ def olvide_credenciales(request, accion):
                 params = {
                     "subject": "Recuperación Usuario",
                     "mensaje": "recordar tu Usuario.",
-                    "mensaje2": "Tu Usuario es: <b>"
-                    + usuario.username
-                    + "</b>.<br>Si no has pedido recordar el Usuario, contacta con el administrador.",
+                    "mensaje2": "Tu Usuario es: ",
+                    "mensaje3": usuario.username,                    
+                    "advertencia": "Si no has pedido recordar el Usuario, contacta con el administrador." 
                 }
 
                 enviar_correo(params, correo)
@@ -186,63 +186,27 @@ def crear_random_contrasena():
 
 
 def enviar_correo(mensaje, correo):
-    from email.mime.text import MIMEText
-    from email.mime.multipart import MIMEMultipart
+        
+    subject = mensaje["subject"]
+    receiver_email = correo    
 
-    sender_email = "mfinanzasapp@gmail.com"
-    receiver_email = correo
-    password = "MaestroYagger46*"
-
-    message = MIMEMultipart("alternative")
-    message["Subject"] = mensaje["subject"]
-    message["From"] = sender_email
-    message["To"] = receiver_email
-
-    # Create the plain-text and HTML version of your message
-    html = (
-        """\
-    <!doctype html>
-    <html lang="es">
-    <head>
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        <!-- Bootstrap CSS -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
-
-    </head>
-    <body>
-    <div class="bg-black">
-        <div class="container">      
-        <h1 class="ax-center text-white text-center mb-10">Hola.<br>Has pedido """
-        + mensaje["mensaje"]
-        + """</h1>      
-        <p class="ax-center max-w-96 lh-lg text-white text-center text-2xl mb-10">
-            """
-        + mensaje["mensaje2"]
-        + """
-        </p>      
-        </div>
-    </div>  
-    </body>
-    </html>
-    """
+    template = render_to_string('email_template.html',{
+        'mensaje': mensaje["mensaje"],
+        'mensaje2': mensaje["mensaje2"],
+        'mensaje3': mensaje["mensaje3"],
+        'advertencia': mensaje["advertencia"]
+    })
+    
+    email = EmailMessage(
+        subject,
+        template,
+        settings.EMAIL_HOST_USER,
+        [receiver_email]
     )
 
-    # Turn these into plain/html MIMEText objects
-    part = MIMEText(html, "html")
-
-    # Add HTML/plain-text parts to MIMEMultipart message
-    # The email client will try to render the last part first
-    message.attach(part)
-
-    # Create secure connection with server and send email
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, message.as_string())
+    email.content_subtype = "html"
+    email.fail_silently = False
+    email.send()        
 
 
 @login_required
