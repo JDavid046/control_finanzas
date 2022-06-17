@@ -36,6 +36,8 @@ SECRET_KEY = 'django-insecure-#o&)8+ahwiu1o(+tbg$3dtsi6#6gn*(fyu#qj9c^73q50ve)p$
 
 # Application definition
 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
