@@ -172,9 +172,9 @@
                         <div class="card mb-4">
                             <div class="card-header">
                                 <i class="fas fa-chart-bar me-1"></i>
-                                Capital por Mes
+                                Ahorros por Mes
                             </div>
-                            <div id="containerCapital"></div>
+                            <div id="containerAhorro"></div>
                         </div>
                     </div>
                 </div>
@@ -295,12 +295,12 @@
     </script>
 
     <script type="application/javascript">
-        Highcharts.chart('containerCapital', {
+        Highcharts.chart('containerAhorro', {
             chart: {
                 type: 'line'
             },
             title: {
-                text: 'Capital Total por Mes'
+                text: 'Ahorros por Mes'
             },
             xAxis: {
                 categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -319,8 +319,8 @@
                 }
             },
             series: [{
-                name: 'Capital',
-                data: {{ capital_por_mes| intcomma }}
+                name: 'Ahorro',
+                data: {{ ahorro_por_mes| intcomma }}
             }]
         });
     </script>

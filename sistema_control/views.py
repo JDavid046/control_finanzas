@@ -233,7 +233,7 @@ def home(request):
         todays_date = date.today()
         ingresos_por_mes = obtener_ingresos_por_mes(request, todays_date.year)
         egresos_por_mes = obtener_egresos_por_mes(request, todays_date.year)
-        capital_por_mes = obtener_capital_por_mes(request, todays_date.year)        
+        ahorro_por_mes = obtener_ahorro_por_mes(request, todays_date.year)        
 
         # List of years of select
         years = list(range(datetime.date.today().year, 2015, -1))
@@ -243,7 +243,7 @@ def home(request):
             "egresos": egresos,
             "ingresos_por_mes": ingresos_por_mes,
             "egresos_por_mes": egresos_por_mes,
-            "capital_por_mes": capital_por_mes,
+            "ahorro_por_mes": ahorro_por_mes,
             "years": years,
         }
 
@@ -272,7 +272,7 @@ def home(request):
 
         ingresos_por_mes = obtener_ingresos_por_mes(request, theYear)
         egresos_por_mes = obtener_egresos_por_mes(request, theYear)
-        capital_por_mes = obtener_capital_por_mes(request, theYear) 
+        ahorro_por_mes = obtener_ahorro_por_mes(request, theYear) 
 
         years = list(range(datetime.date.today().year, 2015, -1))
 
@@ -281,7 +281,7 @@ def home(request):
             "egresos": egresos,
             "ingresos_por_mes": ingresos_por_mes,
             "egresos_por_mes": egresos_por_mes,
-            "capital_por_mes": capital_por_mes,
+            "ahorro_por_mes": ahorro_por_mes,
             "years": years,
             "theYear": theYear,
         }
@@ -347,25 +347,25 @@ def obtener_egresos_por_mes(request, year):
     return egresos_por_mes
 
 
-def obtener_capital_por_mes(request, year):
+def obtener_ahorro_por_mes(request, year):
     user= User.objects.values("id").filter(username=request.user)
     query = (        
-        f"SELECT to_char(date_trunc('month', \"fechaMovimiento\"), 'MM') AS month_number,"
-        f" sum( CASE WHEN \"tipoMovimiento_id\" = 1 THEN \"valorMovimiento\" WHEN \"tipoMovimiento_id\" = 2 THEN -\"valorMovimiento\" END ) as capital"
-        f" FROM sistema_control_movimiento WHERE \"usuario_id\" = {user[0]['id']}"
-        f" AND \"fechaMovimiento\"::text LIKE '{year}%' GROUP BY month_number"
+        f"SELECT EXTRACT(month from fechaMovimiento) AS month_number,"
+        f" sum( CASE WHEN tipoMovimiento_id = 1 THEN valorMovimiento WHEN tipoMovimiento_id = 2 THEN -valorMovimiento END ) as capital"
+        f" FROM sistema_control_movimiento WHERE usuario_id = {user[0]['id']}"
+        f" AND fechaMovimiento LIKE '%{year}%' GROUP BY month_number"
     )
 
     with connection.cursor() as cursor:
         cursor.execute(query)
         capital = cursor.fetchall()
 
-    capital_por_mes = [0 for x in range(1, 13)]
+    ahorro_por_mes = [0 for x in range(1, 13)]
 
     for x in range(len(capital)):        
-        capital_por_mes[int(capital[x][0])-1] = float(capital[x][1])        
+        ahorro_por_mes[int(capital[x][0])-1] = float(capital[x][1])        
     
-    return capital_por_mes
+    return ahorro_por_mes
 
 
 @login_required
@@ -637,7 +637,7 @@ def export_excel(request, nombre):
 
 
 def upload_excel(request):
-    usuario = User.objects.get(id=request.user.id)
+    usuario = User.objects.get(id=request.user.id)    
     data = {}
     if "POST" == request.method:
         
@@ -670,38 +670,39 @@ def upload_excel(request):
                 lines = file_data.split("\n")[1:]
                 
                 for line in lines:
-                    fields = line.split(",")
-                    data_dict = {}
-                    data_dict["tipoMovimiento"] = fields[0]
-                    data_dict["descripcionMovimiento"] = fields[1]
-                    data_dict["valorMovimiento"] = fields[2]
-                    data_dict["fechaMovimiento"] = str(fields[3]).strip()
-                    data_dict["usuario"] = usuario
-                    
-                    try:
-                        form = MovimientoForm(data_dict)                
-                        if form.is_valid():
-                            calculo = calculoNuevoCapital(
-                            request.user,
-                            int(data_dict["valorMovimiento"].split('.')[0]),
-                            int(data_dict["tipoMovimiento"]),
-                            "nuevo",
-                            None,
-                        )
-                        if calculo:
-
-                            Movimiento.objects.create(
-                                descripcionMovimiento=data_dict["descripcionMovimiento"],
-                                fechaMovimiento=data_dict["fechaMovimiento"],
-                                tipoMovimiento = TipoMovimiento.objects.get(id=data_dict["tipoMovimiento"]),
-                                usuario=data_dict["usuario"],
-                                valorMovimiento=data_dict["valorMovimiento"]
+                    if(str(line).strip() != ''):
+                        fields = line.split(",")
+                        data_dict = {}
+                        data_dict["tipoMovimiento"] = fields[0]
+                        data_dict["descripcionMovimiento"] = fields[1]
+                        data_dict["valorMovimiento"] = fields[2]
+                        data_dict["fechaMovimiento"] = str(fields[3]).strip()
+                        data_dict["usuario"] = usuario
+                        
+                        try:
+                            form = MovimientoForm(data_dict)                
+                            if form.is_valid():
+                                calculo = calculoNuevoCapital(
+                                request.user,
+                                int(data_dict["valorMovimiento"].split('.')[0]),
+                                int(data_dict["tipoMovimiento"]),
+                                "nuevo",
+                                None,
                             )
+                            if calculo:
 
-                            return HttpResponseRedirect(reverse("movimientos"))
+                                Movimiento.objects.create(
+                                    descripcionMovimiento=data_dict["descripcionMovimiento"],
+                                    fechaMovimiento=data_dict["fechaMovimiento"],
+                                    tipoMovimiento = TipoMovimiento.objects.get(id=data_dict["tipoMovimiento"]),
+                                    usuario=data_dict["usuario"],
+                                    valorMovimiento=data_dict["valorMovimiento"]
+                                )
 
-                    except Exception as e:                
-                        pass
+                        except Exception as e:                
+                            pass                 
+
+                return HttpResponseRedirect(reverse("movimientos"))                    
                 
         except Exception as e:
             pass
