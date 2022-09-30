@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 
-{% block titulo %}Movimientos{% endblock %}
+{% block titulo %}Movimientos Programados{% endblock %}
 {% block icono %}<link rel="icon" href="https://img.icons8.com/cotton/64/000000/receipt.png">{% endblock %}
 
 {% block scripts %}
@@ -70,10 +70,10 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4">Movimientos</h1>
+                    <h1 class="mt-4">Movimientos Programados</h1>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
-                        <li class="breadcrumb-item active">Movimientos</li>
+                        <li class="breadcrumb-item active">Programador</li>
                     </ol>
                     {% if errores == True %}
                         <div class="alert alert-dark" role="alert">
@@ -83,20 +83,20 @@
                     <div class="card mb-4">                        
                         <div class="card-body">
                             <i class="fas fa-table me-1"></i>
-                            Movimientos de <b>{{ request.user.username }}</b>
+                            Movimientos Programados de <b>{{ request.user.username }}</b>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#agregarMovimiento" data-backdrop="static">
-                                    Agregar Movimiento
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#programarMovimiento" data-backdrop="static">
+                                    Programar Movimiento
                                 </button>                                
                                 <a href="{% url 'export-excel' nombre='Movimientos' %}" class="btn btn-outline-warning">Descargar Movimientos <i class="fas fa-download"></i></a>
                                 <a type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#uploadCsv" data-backdrop="static">Subir Movimientos <i class="fas fa-upload"></i></a>
                                 
                                 <!-- Modal Agregar-->
-                                <div class="modal fade" id="agregarMovimiento" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                <div class="modal fade" id="programarMovimiento" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalCenterTitle">Agregar Movimiento</h5>
+                                        <h5 class="modal-title" id="exampleModalCenterTitle">Programar Movimiento</h5>
                                         <button type="button" class="btn btn-outline-primary" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
@@ -158,22 +158,24 @@
                         <div class="card-body">
                             <table id="datatablesSimple">
                                 <thead>
-                                    <tr>                               
-                                        <th>Fecha Movimiento</th>         
+                                    <tr>
+                                        <th>Tipo Movimiento</th>                               
+                                        <th>Descripción</th>
                                         <th>Valor Movimiento</th>
-                                        <th>Tipo Movimiento</th>
-                                        <th>Descripción Movimiento</th>                                        
+                                        <th>Fecha Programada</th>                                                   
+                                        <th>Última Fecha de Ejecución</th>                                                   
                                         <th colspan="2">Opciones</th>                                        
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% load humanize %}
                                     {% for movimiento in movimientos %}
-                                    <tr>                                               
-                                        <td>{{ movimiento.fechaMovimiento }}</td>                                 
-                                        <td>{{ movimiento.valorMovimiento|intcomma }}</td>
-                                        <td>{{ movimiento.tipoMovimiento }}</td>
-                                        <td>{{ movimiento.descripcionMovimiento }}</td>                                        
+                                    <tr>
+                                        <td>{{ movimiento.tipoMovimiento }}</td>   
+                                        <td>{{ movimiento.descripcionMovimientoProgramado }}</td>                                            
+                                        <td>{{ movimiento.valorMovimientoProgramado|intcomma }}</td>
+                                        <td>{{ movimiento.fechaMovimientoProgramado }}</td>  
+                                        <td>{{ movimiento.ultimaFechaEjecucion }}</td>                                                                             
                                         <!--<td><a href="{% url 'editarMovimiento' movimiento.id %}" class="btn btn-success">Editar</a></td>-->
                                         <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#eliminarModal{{movimiento.id}}">Eliminar</button></td>
                                     </tr>
@@ -183,18 +185,18 @@
                                     <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Eliminar Movimiento</h5>
+                                        <h5 class="modal-title" id="exampleModalLabel">Eliminar Movimiento Programado</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
                                             Está seguro que desea eliminar el movimiento:
                                             <br>
                                             <b>
-                                            {{ movimiento.tipoMovimiento }} - {{ movimiento.descripcionMovimiento }} - $ {{ movimiento.valorMovimiento|intcomma }} - {{ movimiento.fechaMovimiento }}</b>
+                                            {{ movimiento.tipoMovimiento }} - {{ movimiento.descripcionMovimientoProgramado }} - $ {{ movimiento.valorMovimientoProgramado|intcomma }} - {{ movimiento.fechaMovimientoProgramado }}</b>
                                         </div>
                                         <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                        <a href="{% url 'eliminarMovimiento' movimiento.id %}" class="btn btn-danger" >Eliminar</a>
+                                        <a href="{% url 'eliminarMovimientoProgramado' movimiento.id %}" class="btn btn-danger" >Eliminar</a>
                                         </div>
                                     </div>
                                     </div>

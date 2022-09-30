@@ -58,4 +58,15 @@ class MovimientoForm(forms.ModelForm):
             'valorMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'50'}),   
             'fechaMovimiento': DateInput(),
         }
-        
+
+class ProgramadorForm(forms.ModelForm):
+    class Meta:
+        model = Movimiento
+        fields = ['tipoMovimiento', 'descripcionMovimiento', 'valorMovimiento', 'fechaMovimiento']
+
+        widgets = {
+            'tipoMovimiento': forms.Select(attrs={'class':'form-select'}),
+            'descripcionMovimiento': forms.Textarea(attrs={'class':'form-control'}),
+            'valorMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'50'}),   
+            'fechaMovimiento': DateInput(),
+        }
