@@ -68,5 +68,5 @@ class ProgramadorForm(forms.ModelForm):
             'tipoMovimiento': forms.Select(attrs={'class':'form-select'}),
             'descripcionMovimiento': forms.Textarea(attrs={'class':'form-control'}),
             'valorMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'50'}),   
-            'fechaMovimiento': DateInput(),
+            'fechaMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'1'}),
         }

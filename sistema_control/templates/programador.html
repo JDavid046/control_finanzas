@@ -88,8 +88,6 @@
                                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#programarMovimiento" data-backdrop="static">
                                     Programar Movimiento
                                 </button>                                
-                                <a href="{% url 'export-excel' nombre='Movimientos' %}" class="btn btn-outline-warning">Descargar Movimientos <i class="fas fa-download"></i></a>
-                                <a type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#uploadCsv" data-backdrop="static">Subir Movimientos <i class="fas fa-upload"></i></a>
                                 
                                 <!-- Modal Agregar-->
                                 <div class="modal fade" id="programarMovimiento" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -101,8 +99,7 @@
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                         </div>
-                                        <div class="modal-body">
-                                            <p><strong>IMPORTANTE:</strong> No utilizar saltos de línea en la descripción del movimiento.</p>
+                                        <div class="modal-body">                                            
                                             <form method="POST">
                                                 {% csrf_token %}
                                                 {{ form.as_p }}                                            
