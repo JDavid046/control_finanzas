@@ -777,10 +777,10 @@ def programador_view(request):
             tipoNuevoMovimientoId = request.POST["tipoMovimiento"]
             tipoNuevoMovimiento = TipoMovimiento.objects.get(id=tipoNuevoMovimientoId)
 
-            descripcionNuevoMovimiento = request.POST["descripcionMovimiento"]
-            valorNuevoMovimiento = request.POST.get("valorMovimiento")
+            descripcionNuevoMovimiento = request.POST["descripcionMovimientoProgramado"]
+            valorNuevoMovimiento = request.POST.get("valorMovimientoProgramado")
 
-            fecha = request.POST["fechaMovimiento"]
+            fecha = request.POST["fechaMovimientoProgramado"]
 
             Programador.objects.create(
                     descripcionMovimientoProgramado=descripcionNuevoMovimiento,

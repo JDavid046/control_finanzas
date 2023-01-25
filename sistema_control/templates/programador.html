@@ -171,8 +171,12 @@
                                         <td>{{ movimiento.tipoMovimiento }}</td>   
                                         <td>{{ movimiento.descripcionMovimientoProgramado }}</td>                                            
                                         <td>{{ movimiento.valorMovimientoProgramado|intcomma }}</td>
-                                        <td>{{ movimiento.fechaMovimientoProgramado }}</td>  
-                                        <td>{{ movimiento.ultimaFechaEjecucion }}</td>                                                                             
+                                        <td><strong>{{ movimiento.fechaMovimientoProgramado }}</strong> de cada mes</td>  
+                                        {% if movimiento.ultimaFechaEjecucion %}
+                                        <td>{{ movimiento.ultimaFechaEjecucion }}</td>
+                                        {% else %}
+                                        <td>--</td>
+                                        {% endif %}                                                                                                             
                                         <!--<td><a href="{% url 'editarMovimiento' movimiento.id %}" class="btn btn-success">Editar</a></td>-->
                                         <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#eliminarModal{{movimiento.id}}">Eliminar</button></td>
                                     </tr>
