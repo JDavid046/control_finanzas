@@ -156,14 +156,14 @@
                     </div>                
                     <div class="card mb-4">  
                         <div class="card-body">
-                            <table id="datatablesSimple" class="table table-striped" style="width:100%">
+                            <table id="datatablesSimple" class="table table-striped" style="width:100%" class="table table-striped" style="width:100%">
                                 <thead>
                                     <tr>                               
                                         <th>Fecha Movimiento</th>         
                                         <th>Valor Movimiento</th>
                                         <th>Tipo Movimiento</th>
                                         <th>Descripción Movimiento</th>                                        
-                                        <th colspan="2">Opciones</th>                                        
+                                        <th>Opciones</th> <!--<th colspan="2">Opciones</th>-->                                        
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -179,26 +179,26 @@
                                     </tr>
 
                                     <!-- Modal Eliminar -->
-                                <div class="modal fade" id="eliminarModal{{movimiento.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Eliminar Movimiento</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <div class="modal fade" id="eliminarModal{{movimiento.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Eliminar Movimiento</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Está seguro que desea eliminar el movimiento:
+                                                <br>
+                                                <b>
+                                                {{ movimiento.tipoMovimiento }} - {{ movimiento.descripcionMovimiento }} - $ {{ movimiento.valorMovimiento|intcomma }} - {{ movimiento.fechaMovimiento }}</b>
+                                            </div>
+                                            <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <a href="{% url 'eliminarMovimiento' movimiento.id %}" class="btn btn-danger" >Eliminar</a>
+                                            </div>
                                         </div>
-                                        <div class="modal-body">
-                                            Está seguro que desea eliminar el movimiento:
-                                            <br>
-                                            <b>
-                                            {{ movimiento.tipoMovimiento }} - {{ movimiento.descripcionMovimiento }} - $ {{ movimiento.valorMovimiento|intcomma }} - {{ movimiento.fechaMovimiento }}</b>
-                                        </div>
-                                        <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                        <a href="{% url 'eliminarMovimiento' movimiento.id %}" class="btn btn-danger" >Eliminar</a>
                                         </div>
                                     </div>
-                                    </div>
-                                </div>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -241,5 +241,32 @@
     </script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js">
     </script>-->    
+
+    <script>
+        $(document).ready(function () {
+            $('#datatablesSimple').DataTable({
+                "language": {
+                    "sProcessing": "Procesando ...",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros de _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(Filtrando de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero", "sLast": "Último", "sNext": "Siguiente", "sPrevious": "Anterior"
+                    },
+                    "oAria": {
+                        "sSortAscending": ": Activar para ordenar la columna de manera ascendente", "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 {% endblock %}
