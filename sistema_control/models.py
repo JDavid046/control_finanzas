@@ -27,3 +27,12 @@ class Movimiento(models.Model):
 
     def __str__(self):
         return self.tipoMovimiento.nombreTipoMovimiento + " - "+  self.usuario.username       
+
+class Programador(models.Model):
+    id = models.AutoField(primary_key=True)    
+    usuario = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
+    tipoMovimiento = models.ForeignKey(TipoMovimiento, null=False, blank=False, on_delete=models.CASCADE)
+    descripcionMovimientoProgramado = models.TextField()
+    valorMovimientoProgramado = models.DecimalField(max_digits=20, decimal_places=2)
+    fechaMovimientoProgramado = models.IntegerField()
+    ultimaFechaEjecucion = models.DateField(null=True)

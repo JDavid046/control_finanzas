@@ -13,7 +13,7 @@ from django.db.models.aggregates import Sum
 from django.http.response import HttpResponse
 from xlwt.BIFFRecords import XcallSupBookRecord
 from xlwt.Style import XFStyle
-from sistema_control.models import Movimiento, Profile, TipoMovimiento
+from sistema_control.models import Movimiento, Profile, Programador, TipoMovimiento
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password, make_password
@@ -21,7 +21,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from .forms import MovimientoForm, UserLoginForm, UserRegisterForm
+from .forms import MovimientoForm, ProgramadorForm, UserLoginForm, UserRegisterForm
 from django.contrib.auth import get_user_model
 from django.db.models.functions import Extract
 from django.db import connection
@@ -759,3 +759,82 @@ def cambiar_contrasena(request):
 def error_404_view(request, exception):       
     data = {"name": "ThePythonDjango.com"} 
     return render(request,'error_404.html')
+
+@login_required
+def programador_view(request):
+    if request.method != "POST":
+        movimientosProgramados = Programador.objects.filter(usuario=request.user).order_by(
+            "fechaMovimientoProgramado"
+        )
+        programadorForm = ProgramadorForm()
+        context = {"movimientos": movimientosProgramados, "form": programadorForm}
+    else:
+        form = ProgramadorForm(data=request.POST)
+
+        if form.is_valid():
+
+            user = request.user
+            tipoNuevoMovimientoId = request.POST["tipoMovimiento"]
+            tipoNuevoMovimiento = TipoMovimiento.objects.get(id=tipoNuevoMovimientoId)
+
+            descripcionNuevoMovimiento = request.POST["descripcionMovimientoProgramado"]
+            valorNuevoMovimiento = request.POST.get("valorMovimientoProgramado")
+
+            fecha = request.POST["fechaMovimientoProgramado"]
+
+            Programador.objects.create(
+                    descripcionMovimientoProgramado=descripcionNuevoMovimiento,
+                    fechaMovimientoProgramado=fecha,
+                    tipoMovimiento=tipoNuevoMovimiento,
+                    usuario=user,
+                    valorMovimientoProgramado=valorNuevoMovimiento,
+                )
+
+            return HttpResponseRedirect(reverse("programador"))
+        else:
+                movimientos = Programador.objects.filter(usuario=request.user)
+                movimientoForm = ProgramadorForm()
+                context = {
+                    "movimientos": movimientos,
+                    "form": movimientoForm,
+                    "errores": True,
+                }
+
+    return render(request, "programador.html", context)
+
+
+@login_required
+def eliminar_movimiento_programado(request, id):
+    movimiento = Programador.objects.get(id=id)
+    #usuario = Profile.objects.get(user=request.user)
+    movimiento.delete()
+
+    return redirect("programador")
+
+
+@login_required
+def editar_movimiento_programado(request, id):
+    movimientoP = Programador.objects.get(id=id)
+    valorAnterior = movimientoP.valorMovimientoProgramado
+    if request.method != "POST":
+        form = ProgramadorForm(instance=movimientoP)
+        contexto = {"form": form, "fuente": "programador"}
+    else:
+        form = ProgramadorForm(request.POST, instance=movimientoP)
+        contexto = {"form": form}
+
+        if form.is_valid():            
+
+            form.save()
+            return HttpResponseRedirect(reverse("programador"))
+        else:
+                movimientos = Programador.objects.filter(usuario=request.user)
+                movimientoForm = ProgramadorForm()
+                context = {
+                    "movimientos": movimientos,
+                    "form": movimientoForm,
+                    "errores": True,
+                }            
+
+    return render(request, "editarMovimiento.html", contexto)
+    
