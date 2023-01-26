@@ -764,7 +764,7 @@ def error_404_view(request, exception):
 def programador_view(request):
     if request.method != "POST":
         movimientosProgramados = Programador.objects.filter(usuario=request.user).order_by(
-            "-fechaMovimientoProgramado"
+            "fechaMovimientoProgramado"
         )
         programadorForm = ProgramadorForm()
         context = {"movimientos": movimientosProgramados, "form": programadorForm}
@@ -810,4 +810,31 @@ def eliminar_movimiento_programado(request, id):
     movimiento.delete()
 
     return redirect("programador")
+
+
+@login_required
+def editar_movimiento_programado(request, id):
+    movimientoP = Programador.objects.get(id=id)
+    valorAnterior = movimientoP.valorMovimientoProgramado
+    if request.method != "POST":
+        form = ProgramadorForm(instance=movimientoP)
+        contexto = {"form": form, "fuente": "programador"}
+    else:
+        form = ProgramadorForm(request.POST, instance=movimientoP)
+        contexto = {"form": form}
+
+        if form.is_valid():            
+
+            form.save()
+            return HttpResponseRedirect(reverse("programador"))
+        else:
+                movimientos = Programador.objects.filter(usuario=request.user)
+                movimientoForm = ProgramadorForm()
+                context = {
+                    "movimientos": movimientos,
+                    "form": movimientoForm,
+                    "errores": True,
+                }            
+
+    return render(request, "editarMovimiento.html", contexto)
     

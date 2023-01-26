@@ -1,6 +1,13 @@
 {% extends 'layout.html' %}
 
-{% block titulo %}Editar Movimiento{% endblock %}
+{% block titulo %}
+{% if fuente == "programador" %}
+Editar Movimiento Programado
+{% else %}
+Editar Movimiento
+{% endif %}
+{% endblock %}
+
 {% block icono %}<link rel="icon" href="https://img.icons8.com/windows/32/000000/edit--v1.png">{% endblock %}
 
 {% block scripts %}
@@ -70,17 +77,24 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
+                    {% if fuente == "programador" %}
+                    <h1 class="mt-4">Editar Movimiento Programado</h1>
+                    {% else %}
                     <h1 class="mt-4">Editar Movimiento</h1>
+                    {% endif %}
+                    
                     <ol class="breadcrumb mb-4">
+                        {% if fuente == "programador" %}
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'programador' %}">Programador</a></li>
+                        <li class="breadcrumb-item active">Editar Movimiento Programado</li>
+                        {% else %}
                         <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
                         <li class="breadcrumb-item"><a href="{% url 'movimientos' %}">Movimientos</a></li>
                         <li class="breadcrumb-item active">Editar Movimiento</li>
+                        {% endif %}                        
                     </ol>
-                        {% if errores == True %}
-                            <div class="alert alert-dark" role="alert">
-                                <b>Error.</b> No se puede agregar Egreso Superior al Capital Total.
-                            </div>
-                        {% endif %}
+
                     <div class="card mb-4">
                         <div class="card-body">
                           <!-- Modal Agregar-->
@@ -88,7 +102,11 @@
                     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalCenterTitle">Editar Movimiento</h5>
+                            {% if fuente == "programador" %}
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Editar Movimiento Programado</h5>
+                            {% else %}
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Editar Movimiento</h5>
+                            {% endif %}
                         </div>
                         <div class="modal-body">
                             <form method="POST">
@@ -96,8 +114,12 @@
                                 {{ form.as_p }}                                            
                         </div>
                         <div class="modal-footer">
-                        <a href="{% url 'movimientos' %}" class="btn btn-danger" data-dismiss="modal">Cancelar</a>
-                        <button type="submit" id="submit" class="btn btn-success">Guardar</button>
+                            {% if fuente == "programador" %}
+                            <a href="{% url 'programador' %}" class="btn btn-danger" data-dismiss="modal">Cancelar</a>
+                            {% else %}
+                            <a href="{% url 'movimientos' %}" class="btn btn-danger" data-dismiss="modal">Cancelar</a>
+                            {% endif %}                                                        
+                            <button type="submit" id="submit" class="btn btn-success">Guardar</button>
                         </form>
                         </div>
                     </div>

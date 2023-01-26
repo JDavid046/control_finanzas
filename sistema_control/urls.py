@@ -20,4 +20,5 @@ urlpatterns = [
     path('upload-excel', views.upload_excel, name='upload-excel'),
     path('perfil/', views.perfil_usuario, name='perfil'),
     path('cambiar-contrasena/', views.cambiar_contrasena, name='cambiarContrasena'),    
+    path('editar-movimiento-programado/<int:id>/', views.editar_movimiento_programado, name='editarMovimientoProgramado')    
 ]
