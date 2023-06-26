@@ -21,7 +21,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from .forms import MovimientoForm, ProgramadorForm, UserLoginForm, UserRegisterForm
+from .forms import MovimientoForm, ProgramadorForm, UserLoginForm, UserRegisterForm, EditarMovimientoForm
 from django.contrib.auth import get_user_model
 from django.db.models.functions import Extract
 from django.db import connection
@@ -479,35 +479,45 @@ def editar_movimiento(request, id):
     movimiento = Movimiento.objects.get(id=id)
     valorAnterior = movimiento.valorMovimiento
     if request.method != "POST":
-        form = MovimientoForm(instance=movimiento)
-        contexto = {"form": form}
+        form = EditarMovimientoForm(instance=movimiento)
+        contexto = {"form": form}        
     else:
-        form = MovimientoForm(request.POST, instance=movimiento)
+        form = EditarMovimientoForm(request.POST, instance=movimiento)
         contexto = {"form": form}
 
         if form.is_valid():
 
-            tipoNuevoMovimientoId = request.POST["tipoMovimiento"]
-            tipoMovimiento = TipoMovimiento.objects.get(id=tipoNuevoMovimientoId)
+            #tipoNuevoMovimientoId = request.POST["tipoMovimiento"]
+            #tipoMovimiento = TipoMovimiento.objects.get(id=tipoNuevoMovimientoId)
             descripcionMovimiento = request.POST.get("descripcionMovimiento")
-            valorMovimiento = request.POST.get("valorMovimiento")
+            #valorMovimiento = request.POST.get("valorMovimiento")
 
             fecha = request.POST["fechaMovimiento"]
 
-            calculo = calculoNuevoCapital(
-                request.user,
-                int(float(valorMovimiento)),
-                tipoMovimiento.id,
-                "editar",
-                valorAnterior,
-            )
-            if calculo:
-
+            if fecha > str(datetime.date.today()):  
+                form = EditarMovimientoForm(instance=movimiento)
+                contexto = {"form": form, "mensaje": "La fecha no puede ser posterior a la fecha de hoy" ,"errores": True}
+            else:                          
                 form.save()
                 return HttpResponseRedirect(reverse("movimientos"))
-            else:
-                form = MovimientoForm(instance=movimiento)
-                contexto = {"form": form, "errores": True}
+        
+            """calculo = calculoNuevoCapital(
+                    request.user,
+                    int(float(valorMovimiento)),
+                    tipoMovimiento.id,
+                    "editar",
+                    valorAnterior,
+                )
+                if calculo:
+
+                    form.save()
+                    return HttpResponseRedirect(reverse("movimientos"))
+                else:
+                    form = MovimientoForm(instance=movimiento)
+                    contexto = {"form": form, "errores": True}"""
+        else:
+            form = EditarMovimientoForm(instance=movimiento)
+            contexto = {"form": form, "errores": True}
     return render(request, "editarMovimiento.html", contexto)
 
 

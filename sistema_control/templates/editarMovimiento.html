@@ -60,10 +60,10 @@ Editar Movimiento
                             <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>
                             Egresos
                         </a>
-                        <a class="nav-link" href="{% url 'programador' %}">
+                        <!--<a class="nav-link" href="{% url 'programador' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-clock"></i></div>
                             Programador
-                        </a>
+                        </a>-->
                     </div>
                 </div>
                 <div class="sb-sidenav-footer">
@@ -94,6 +94,11 @@ Editar Movimiento
                         <li class="breadcrumb-item active">Editar Movimiento</li>
                         {% endif %}                        
                     </ol>
+                    {% if errores == True %}
+                        <div class="alert alert-dark" role="alert">
+                            <b>Error.</b> {{ mensaje }}.
+                        </div>
+                        {% endif %}
 
                     <div class="card mb-4">
                         <div class="card-body">

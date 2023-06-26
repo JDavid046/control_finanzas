@@ -59,6 +59,29 @@ class MovimientoForm(forms.ModelForm):
             'fechaMovimiento': DateInput(),
         }
 
+class EditarMovimientoForm(forms.ModelForm):
+
+    AVAILABLE_YEAR_CHOICES = list(range(2010, datetime.date.today().year+1))
+    #fechaMovimiento = forms.DateField(initial=datetime.date.today(), widget=forms.SelectDateWidget(years=AVAILABLE_YEAR_CHOICES))
+
+    class Meta:
+        model = Movimiento
+        fields = ['descripcionMovimiento', 'fechaMovimiento']
+        #fields = ['tipoMovimiento', 'descripcionMovimiento', 'valorMovimiento', 'fechaMovimiento']
+
+        widgets = {
+            #'tipoMovimiento': forms.Select(attrs={'class':'form-select'}),
+            'descripcionMovimiento': forms.Textarea(attrs={'class':'form-control'}),
+            #'valorMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'50'}),   
+            'fechaMovimiento': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={
+                    'class': 'form-control',
+                    'type': 'date'
+                }
+            ),
+        }
+
 class ProgramadorForm(forms.ModelForm):
     class Meta:
         model = Programador

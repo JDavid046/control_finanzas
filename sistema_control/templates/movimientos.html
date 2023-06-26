@@ -53,10 +53,10 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>
                             Egresos
                         </a>
-                        <a class="nav-link" href="{% url 'programador' %}">
+                        <!--<a class="nav-link" href="{% url 'programador' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-clock"></i></div>
                             Programador
-                        </a>
+                        </a>-->
                     </div>
                 </div>
                 <div class="sb-sidenav-footer">
@@ -163,7 +163,9 @@
                                         <th>Valor Movimiento</th>
                                         <th>Tipo Movimiento</th>
                                         <th>Descripción Movimiento</th>                                        
-                                        <th>Opciones</th> <!--<th colspan="2">Opciones</th>-->                                        
+                                        <th>Opciones</th> 
+                                        <th></th> 
+                                        <!--<th colspan="2">Opciones</th>-->                                        
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -174,7 +176,7 @@
                                         <td>{{ movimiento.valorMovimiento|intcomma }}</td>
                                         <td>{{ movimiento.tipoMovimiento }}</td>
                                         <td>{{ movimiento.descripcionMovimiento }}</td>                                        
-                                        <!--<td><a href="{% url 'editarMovimiento' movimiento.id %}" class="btn btn-success">Editar</a></td>-->
+                                        <td><a href="{% url 'editarMovimiento' movimiento.id %}" class="btn btn-success">Editar</a></td>
                                         <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#eliminarModal{{movimiento.id}}">Eliminar</button></td>
                                     </tr>
 

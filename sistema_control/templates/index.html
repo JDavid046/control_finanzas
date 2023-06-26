@@ -65,10 +65,10 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>
                             Egresos
                         </a>
-                        <a class="nav-link" href="{% url 'programador' %}">
+                        <!--<a class="nav-link" href="{% url 'programador' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-clock"></i></div>
                             Programador
-                        </a>
+                        </a>-->
                     </div>
                 </div>
                 <div class="sb-sidenav-footer">
@@ -290,8 +290,8 @@
                 }
             },
             series: [{
-                name: 'Total de Ingresos',
-                showInLegend: false,
+                name: 'Total de Egresos',
+                showInLegend: true,
                 data: {{ egresos_por_mes| intcomma }}
 
     }]
@@ -307,7 +307,7 @@
                 text: 'Ahorros por Mes'
             },
             xAxis: {
-                categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dec']
+                categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
             },
             yAxis: {
                 title: {
