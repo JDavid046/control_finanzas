@@ -172,15 +172,44 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xl-12">
+                    <div class="col-xl-8">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-chart-bar me-1"></i>                            
+                            </div>
+                            <div id="containerAhorro"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-chart-bar me-1"></i>      
+                                Total de Ahorros                          
+                            </div>         
+                            <div style="height: 30px;">                              
+                            </div>                   
+                            <div style="height: 20px;">
+                                <center><h5>Total Ahorrado en 
+                                    {% if theYear %}
+                                    {{ theYear }}
+                                    {% else %}
+                                    {{ years.0 }}
+                                    {% endif %}</h5></center>                                
+                            </div>
+                            <div style="height: 350px;" id="containerAhorroTotal"></div>
+                        </div>
+                    </div>
+
+                    <!--<div class="col-xl-12">
                         <div class="card mb-4">
                             <div class="card-header">
                                 <i class="fas fa-chart-bar me-1"></i>
                                 Ahorros por Mes
                             </div>
                             <div id="containerAhorro"></div>
+                            <div id="containerAhorroTotal"></div>
                         </div>
-                    </div>
+                    </div>-->
                 </div>
         </div>
     </div>
@@ -326,8 +355,59 @@
                 name: 'Ahorro',
                 data: {{ ahorro_por_mes| intcomma }}
             }]
-        });
+        });        
     </script>
+
+    <script type="application/javascript">             
+
+        var total_ahorros = ({{total_ahorros}}).toLocaleString('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        maximumFractionDigits: 0, 
+        minimumFractionDigits: 0, 
+        });             
+        var numerAhorro = Number({{total_ahorros}});        
+                    
+        Highcharts.chart('containerAhorroTotal', {
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: 0,
+                plotShadow: false
+            },
+            title: {
+                text: '<b>'+ total_ahorros+'</b>',
+                align: 'center',
+                verticalAlign: 'middle',
+                y: 60
+            },                              
+            plotOptions: {
+                pie: {
+                    dataLabels: {
+                        enabled: true,
+                        distance: -50,
+                        style: {
+                            fontWeight: 'bold',
+                            color: 'white'
+                        }
+                    },
+                    startAngle: -90,
+                    endAngle: 90,
+                    center: ['50%', '75%'],
+                    size: '110%'
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Ahorrado: ',
+                innerSize: '60%',
+                data: [
+                    ['', numerAhorro]                    
+                ]
+            }]
+        });
+
+    </script>
+
 
     {% block scripts_cuerpo %}
     {% endblock %}

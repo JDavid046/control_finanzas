@@ -233,7 +233,8 @@ def home(request):
         todays_date = date.today()
         ingresos_por_mes = obtener_ingresos_por_mes(request, todays_date.year)
         egresos_por_mes = obtener_egresos_por_mes(request, todays_date.year)
-        ahorro_por_mes = obtener_ahorro_por_mes(request, todays_date.year)        
+        ahorro_por_mes = obtener_ahorro_por_mes(request, todays_date.year)  
+        total_ahorros =  sumar_ahorros(ahorro_por_mes)                                     
 
         # List of years of select
         years = list(range(datetime.date.today().year, 2015, -1))
@@ -244,6 +245,7 @@ def home(request):
             "ingresos_por_mes": ingresos_por_mes,
             "egresos_por_mes": egresos_por_mes,
             "ahorro_por_mes": ahorro_por_mes,
+            "total_ahorros": total_ahorros,
             "years": years,
         }
 
@@ -273,6 +275,7 @@ def home(request):
         ingresos_por_mes = obtener_ingresos_por_mes(request, theYear)
         egresos_por_mes = obtener_egresos_por_mes(request, theYear)
         ahorro_por_mes = obtener_ahorro_por_mes(request, theYear) 
+        total_ahorros =  sumar_ahorros(ahorro_por_mes)   
 
         years = list(range(datetime.date.today().year, 2015, -1))
 
@@ -282,7 +285,8 @@ def home(request):
             "ingresos_por_mes": ingresos_por_mes,
             "egresos_por_mes": egresos_por_mes,
             "ahorro_por_mes": ahorro_por_mes,
-            "years": years,
+            "total_ahorros": total_ahorros,
+            "years": years,                        
             "theYear": theYear,
         }
 
@@ -719,6 +723,15 @@ def upload_excel(request):
             
     return render(request, "movimientos.html", context)
 
+
+def sumar_ahorros(array_ahorros):
+
+    suma_total = 0
+    for i in array_ahorros:
+        if i > 0:
+            suma_total = suma_total + i
+
+    return str(suma_total)
 
 @login_required
 def perfil_usuario(request):
