@@ -13,7 +13,7 @@ from django.db.models.aggregates import Sum
 from django.http.response import HttpResponse
 from xlwt.BIFFRecords import XcallSupBookRecord
 from xlwt.Style import XFStyle
-from sistema_control.models import Movimiento, Profile, Programador, TipoMovimiento
+from sistema_control.models import Movimiento, Profile, Programador, TipoMovimiento, Categorias
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password, make_password
@@ -21,7 +21,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from .forms import MovimientoForm, ProgramadorForm, UserLoginForm, UserRegisterForm, EditarMovimientoForm
+from .forms import MovimientoForm, ProgramadorForm, UserLoginForm, UserRegisterForm, EditarMovimientoForm, CategoriasForm
 from django.contrib.auth import get_user_model
 from django.db.models.functions import Extract
 from django.db import connection
@@ -379,8 +379,9 @@ def movimientos_usuario(request):
         movimientos = Movimiento.objects.filter(usuario=request.user).order_by(
             "-fechaMovimiento"
         )
-        movimientoForm = MovimientoForm()
-        context = {"movimientos": movimientos, "form": movimientoForm}
+        movimientoForm = MovimientoForm()       
+        categorias = Categorias.objects.filter(usuario=request.user)
+        context = {"movimientos": movimientos, "form": movimientoForm, "categorias": categorias}
     else:
         form = MovimientoForm(data=request.POST)
 
@@ -389,6 +390,8 @@ def movimientos_usuario(request):
             user = request.user
             tipoNuevoMovimientoId = request.POST["tipoMovimiento"]
             tipoNuevoMovimiento = TipoMovimiento.objects.get(id=tipoNuevoMovimientoId)
+            categoria = request.POST["categoria"]            
+            tipoCategoria = None if categoria == '0' else Categorias.objects.get(id=categoria)
 
             descripcionNuevoMovimiento = request.POST["descripcionMovimiento"]
             valorNuevoMovimiento = request.POST.get("valorMovimiento")
@@ -409,6 +412,7 @@ def movimientos_usuario(request):
                     tipoMovimiento=tipoNuevoMovimiento,
                     usuario=user,
                     valorMovimiento=valorNuevoMovimiento,
+                    categoria = tipoCategoria
                 )
 
                 return HttpResponseRedirect(reverse("movimientos"))
@@ -482,11 +486,13 @@ def calculoNuevoCapital(usuario, valorMovimiento, tipoMovimiento, accion, valorA
 def editar_movimiento(request, id):
     movimiento = Movimiento.objects.get(id=id)
     valorAnterior = movimiento.valorMovimiento
+    categorias = Categorias.objects.filter(usuario=request.user)
     if request.method != "POST":
         form = EditarMovimientoForm(instance=movimiento)
-        contexto = {"form": form}        
+        categoria = movimiento.categoria
+        contexto = {"form": form, "categoria":categoria, "categorias": categorias}        
     else:
-        form = EditarMovimientoForm(request.POST, instance=movimiento)
+        form = EditarMovimientoForm(request.POST, instance=movimiento)        
         contexto = {"form": form}
 
         if form.is_valid():
@@ -496,13 +502,18 @@ def editar_movimiento(request, id):
             descripcionMovimiento = request.POST.get("descripcionMovimiento")
             #valorMovimiento = request.POST.get("valorMovimiento")
 
+            categoria = request.POST["categoria"]            
+            tipoCategoria = None if categoria == '0' else Categorias.objects.get(id=categoria)
+
             fecha = request.POST["fechaMovimiento"]
 
             if fecha > str(datetime.date.today()):  
                 form = EditarMovimientoForm(instance=movimiento)
                 contexto = {"form": form, "mensaje": "La fecha no puede ser posterior a la fecha de hoy" ,"errores": True}
-            else:                          
+            else:                                          
                 form.save()
+                movimiento.categoria = tipoCategoria
+                movimiento.save()
                 return HttpResponseRedirect(reverse("movimientos"))
         
             """calculo = calculoNuevoCapital(
@@ -860,4 +871,68 @@ def editar_movimiento_programado(request, id):
                 }            
 
     return render(request, "editarMovimiento.html", contexto)
+
+@login_required
+def categorias(request):
+    user = request.user    
+    
+    if request.method != "POST":
+        categorias = Categorias.objects.filter(usuario=request.user)
+        form = CategoriasForm()
+        contexto = {"categorias":categorias,"form": form}
+    else:
+        form = CategoriasForm(request.POST)
+        contexto = {"form": form}
+
+        if form.is_valid():            
+            descripcion = request.POST["descripcion"]
+
+            Categorias.objects.create(
+                    descripcion = descripcion,
+                    usuario=user,
+                )
+                     
+            return HttpResponseRedirect(reverse("categorias"))
+        else:
+                categorias = Categorias.objects.filter(usuario=request.user)
+                form = CategoriasForm()
+                context = {
+                    "categorias": categorias,
+                    "form": form,
+                    "errores": True,
+                }                
+
+    return render(request, "categorias.html", contexto)
+
+@login_required
+def editarCategoria(request, id):
+    categoria = Categorias.objects.get(id=id)    
+    if request.method != "POST":
+        form = CategoriasForm(instance=categoria)
+        contexto = {"form": form}
+    else:
+        form = CategoriasForm(request.POST, instance=categoria)
+        contexto = {"form": form}
+
+        if form.is_valid():            
+
+            form.save()
+            return HttpResponseRedirect(reverse("categorias"))
+        else:
+                categoria = Categorias.objects.filter(usuario=request.user)
+                categoriaForm = CategoriasForm()
+                context = {
+                    "movimientos": categoria,
+                    "form": categoriaForm,
+                    "errores": True,
+                }            
+
+    return render(request, "editarCategoria.html", contexto)
+
+@login_required
+def eliminarCategoria(request, id):
+    categoria = Categorias.objects.get(id=id)    
+    categoria.delete()
+
+    return redirect("programador")
     
