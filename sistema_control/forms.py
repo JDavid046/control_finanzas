@@ -45,16 +45,14 @@ class DateInput(forms.DateInput):
 
 class MovimientoForm(forms.ModelForm):
 
-    AVAILABLE_YEAR_CHOICES = list(range(2010, datetime.date.today().year+1))
-    #fechaMovimiento = forms.DateField(initial=datetime.date.today(), widget=forms.SelectDateWidget(years=AVAILABLE_YEAR_CHOICES))
-
-    class Meta:
-        model = Movimiento
-        fields = ['tipoMovimiento', 'descripcionMovimiento', 'valorMovimiento', 'fechaMovimiento']
+    class Meta:     
+        model = Movimiento        
+        fields = ['tipoMovimiento', 'descripcionMovimiento', 'valorMovimiento', 'fechaMovimiento']        
+        
 
         widgets = {
             'tipoMovimiento': forms.Select(attrs={'class':'form-select'}),
-            'descripcionMovimiento': forms.Textarea(attrs={'class':'form-control'}),
+            'descripcionMovimiento': forms.Textarea(attrs={'class':'form-control'}),            
             'valorMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'50'}),   
             'fechaMovimiento': DateInput(),
         }
@@ -92,4 +90,14 @@ class ProgramadorForm(forms.ModelForm):
             'descripcionMovimientoProgramado': forms.Textarea(attrs={'class':'form-control'}),
             'valorMovimientoProgramado': forms.NumberInput(attrs={'class':'form-control', 'min':'50'}),   
             'fechaMovimientoProgramado': forms.NumberInput(attrs={'class':'form-control', 'min':'1', 'max':'30'})
+        }
+
+
+class CategoriasForm(forms.ModelForm):
+    class Meta:
+        model = Categorias
+        fields = ['descripcion']
+
+        widgets = {
+            'descripcion': forms.TextInput(attrs={'class':'form-control'})
         }
