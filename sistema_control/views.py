@@ -1,13 +1,12 @@
 import datetime
 from datetime import date
 import re
+from .excel import excel
 from django.conf import settings
 from django.db.models import query
 import numpy as np
 from django.contrib.auth.forms import UserCreationForm
 from numpy.random.mtrand import randint
-import xlwt
-import csv
 from django.contrib.auth.models import User
 from django.db.models.aggregates import Sum
 from django.http.response import HttpResponse
@@ -379,7 +378,7 @@ def movimientos_usuario(request):
         movimientos = Movimiento.objects.filter(usuario=request.user).order_by(
             "-fechaMovimiento"
         )
-        movimientoForm = MovimientoForm()       
+        movimientoForm = MovimientoForm()      
         categorias = Categorias.objects.filter(usuario=request.user)
         context = {"movimientos": movimientos, "form": movimientoForm, "categorias": categorias}
     else:
@@ -579,160 +578,11 @@ def egresos_usuario(request):
 
 
 def export_excel(request, nombre):
-    response = HttpResponse(content_type="text/csv")
-
-    response["Content-Disposition"] = (
-        'attachment; filename="'
-        + nombre
-        + ' de "'
-        + request.user.username
-        + " "
-        + str(datetime.datetime.now())
-        + ".csv"
-    )
-
-    writer = csv.writer(response)
-
-
-    wb = xlwt.Workbook(encoding="UTF-8")
-    ws = wb.add_sheet(nombre)
-    row_num = 0
-    font_style = xlwt.XFStyle()
-    font_style.font.bold = True
-
-    columns = [
-        "Tipo de Movimiento",
-        "Descripción del Movimiento",
-        "Valor del Movimiento",
-        "Fecha del movimiento",
-    ]
-
-    writer.writerow(['Tipo de Movimiento','Descripcion del Movimiento','Valor del Movimiento','Fecha del Movimiento'])
-
-    #for col_num in range(len(columns)):
-        #ws.write(row_num, col_num, columns[col_num], font_style)        
-
-    font_style = xlwt.XFStyle()
-
-    switch_tabla = {
-        "movimiento": Movimiento.objects.all()
-        .filter(usuario=request.user)
-        .values_list(
-            "tipoMovimiento",
-            "descripcionMovimiento",
-            "valorMovimiento",
-            "fechaMovimiento",
-        ),
-        "ingreso": Movimiento.objects.all()
-        .filter(usuario=request.user, tipoMovimiento=1)
-        .values_list(
-            "tipoMovimiento",
-            "descripcionMovimiento",
-            "valorMovimiento",
-            "fechaMovimiento",
-        ),
-        "egreso": Movimiento.objects.all()
-        .filter(usuario=request.user, tipoMovimiento=2)
-        .values_list(
-            "tipoMovimiento",
-            "descripcionMovimiento",
-            "valorMovimiento",
-            "fechaMovimiento",
-        ),
-    }
-
-    rows = None
-
-    if nombre == "Movimientos":
-        rows = switch_tabla["movimiento"]
-    elif nombre == "Ingresos":
-        rows = switch_tabla["ingreso"]
-    elif nombre == "Egresos":
-        rows = switch_tabla["egreso"]
-
-    for row in rows:
-        writer.writerow([str(row[0]), str(row[1]),str(row[2]),str(row[3])])
-        """row_num += 1
-
-        for col_num in range(len(row)):
-            ws.write(row_num, col_num, str(row[col_num]), font_style)"""
-    #wb.save(response)
-
-    return response
+    return excel.export_excel(request, nombre)
 
 
 def upload_excel(request):
-    usuario = User.objects.get(id=request.user.id)    
-    data = {}
-    if "POST" == request.method:
-        
-        try:
-            csv_file = request.FILES["csv_file"]
-            if not csv_file.name.endswith('.csv'):
-                movimientoForm = MovimientoForm()
-                movimientos = Movimiento.objects.filter(usuario=request.user)
-                context = {
-                        "movimientos": movimientos,
-                        "mensaje": "El archivo debe ser un archivo .csv",
-                        "errores": True,
-                        "form": movimientoForm
-                    }
-                
-            #if file is too large, return
-            elif csv_file.multiple_chunks():
-                movimientoForm = MovimientoForm()
-                movimientos = Movimiento.objects.filter(usuario=request.user)
-                context = {
-                        "movimientos": movimientos,
-                        "mensaje": "El archivo supera el peso permitido.",
-                        "errores": True,
-                        "form": movimientoForm
-                    }
-            else:
-                
-                file_data = csv_file.read().decode("utf-8")
-                
-                lines = file_data.split("\n")[1:]
-                
-                for line in lines:
-                    if(str(line).strip() != ''):
-                        fields = line.split(",")
-                        data_dict = {}
-                        data_dict["tipoMovimiento"] = fields[0]
-                        data_dict["descripcionMovimiento"] = fields[1]
-                        data_dict["valorMovimiento"] = fields[2]
-                        data_dict["fechaMovimiento"] = str(fields[3]).strip()
-                        data_dict["usuario"] = usuario
-                        
-                        try:
-                            form = MovimientoForm(data_dict)                
-                            if form.is_valid():
-                                calculo = calculoNuevoCapital(
-                                request.user,
-                                int(data_dict["valorMovimiento"].split('.')[0]),
-                                int(data_dict["tipoMovimiento"]),
-                                "nuevo",
-                                None,
-                            )
-                            if calculo:
-
-                                Movimiento.objects.create(
-                                    descripcionMovimiento=data_dict["descripcionMovimiento"],
-                                    fechaMovimiento=data_dict["fechaMovimiento"],
-                                    tipoMovimiento = TipoMovimiento.objects.get(id=data_dict["tipoMovimiento"]),
-                                    usuario=data_dict["usuario"],
-                                    valorMovimiento=data_dict["valorMovimiento"]
-                                )
-
-                        except Exception as e:                
-                            pass                 
-
-                return HttpResponseRedirect(reverse("movimientos"))                    
-                
-        except Exception as e:
-            pass
-            
-    return render(request, "movimientos.html", context)
+    return excel.upload_excel(request)
 
 
 def sumar_ahorros(array_ahorros):
