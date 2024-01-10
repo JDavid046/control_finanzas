@@ -1,10 +1,17 @@
 {% extends 'layout.html' %}
-
+{% load static %}
 {% block titulo %}Categorías{% endblock %}
 {% block icono %}<link rel="icon" href="https://iconos8.es/icon/jZ03BpcmCli5/category">{% endblock %}
 
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js" crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block head %}
+<script src="{% static 'code/highcharts.js' %}"></script>
+<script src="{% static 'code/modules/exporting.js' %}"></script>
+<script src="{% static 'code/modules/export-data.js' %}"></script>
+<script src="{% static 'code/modules/accessibility.js' %}"></script>
 {% endblock %}
 
 {% block cuerpo %}
@@ -116,51 +123,63 @@
                               </div>
                         </div>
                     </div>                
-                    <div class="card mb-4">  
-                        <div class="card-body" style="display: flex; justify-content: center; align-items: center;">
-                            <table id="datatablesSimple" class="table table-striped" style="width:100%; ">
-                                <thead>
-                                    <tr>                                        
-                                        <th>Descripción</th>                                                  
-                                        <th>Opciones</th>                                                                                                                       
-                                        <th></th>                                                                                                                       
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% load humanize %}
-                                    {% for categoria in categorias %}
-                                    <tr>                                        
-                                        <td>{{ categoria.descripcion }}</td>                                                                                                                                                                                                                                                                                                                                                          
-                                        <td><a href="{% url 'editarCategoria' categoria.id %}" class="btn btn-success">Editar</a></td>
-                                        <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#eliminarModal{{categoria.id}}">Eliminar</button></td>
-                                    </tr>
-
-                                    <!-- Modal Eliminar -->
-                                <div class="modal fade" id="eliminarModal{{categoria.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Eliminar Categoría</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="row">
+                        <div class="col-xl-6">
+                            <div class="card mb-4">  
+                                <div class="card-body" style="display: flex; justify-content: center; align-items: center;">
+                                    <table id="datatablesSimple" class="table table-striped" style="width:100%; ">
+                                        <thead>
+                                            <tr>                                        
+                                                <th>Descripción</th>                                                  
+                                                <th>Opciones</th>                                                                                                                       
+                                                <th></th>                                                                                                                       
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% load humanize %}
+                                            {% for categoria in categorias %}
+                                            <tr>                                        
+                                                <td>{{ categoria.descripcion }}</td>                                                                                                                                                                                                                                                                                                                                                          
+                                                <td><a href="{% url 'editarCategoria' categoria.id %}" class="btn btn-success">Editar</a></td>
+                                                <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#eliminarModal{{categoria.id}}">Eliminar</button></td>
+                                            </tr>
+        
+                                            <!-- Modal Eliminar -->
+                                        <div class="modal fade" id="eliminarModal{{categoria.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Eliminar Categoría</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Está seguro que desea eliminar la categoría:
+                                                    <br>
+                                                    <b>
+                                                    {{ categoria.descripcion }}</b>
+                                                </div>
+                                                <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <a href="{% url 'eliminarCategoria' categoria.id %}" class="btn btn-danger" >Eliminar</a>
+                                                </div>
+                                            </div>
+                                            </div>
                                         </div>
-                                        <div class="modal-body">
-                                            Está seguro que desea eliminar la categoría:
-                                            <br>
-                                            <b>
-                                            {{ categoria.descripcion }}</b>
-                                        </div>
-                                        <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                        <a href="{% url 'eliminarCategoria' categoria.id %}" class="btn btn-danger" >Eliminar</a>
-                                        </div>
-                                    </div>
-                                    </div>
-                                </div>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>                            
+                            </div>
                         </div>
-                    </div>
+                        <div class="col-xl-6">
+                            <div class="card mb-4">  
+                                <div class="card-header">
+                                    <i class="fas fa-chart-bar me-1"></i>                                  
+                                </div>
+                                <div id="containerCategorias"></div>                    
+                            </div>
+                        </div>
+                    </div>                                      
                 </div>
             </main>           
         </div>
@@ -172,5 +191,51 @@
     </script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js">
     </script>
+
+<script type="application/javascript">             
+
+    Highcharts.chart('containerCategorias', {
+        chart: {
+            type: 'pie'
+        },
+        title: {
+            text: 'Cantidad de Movimientos por Categoría.',
+            align: 'left'
+        },
+        tooltip: {
+            headerFormat: '',
+            pointFormat: '<span style="color:{point.color}">\u25CF</span> <b> {point.name}</b><br/>' +
+                'Cantidad de Movimientos: <b>{point.y}</b><br/>'
+        },
+        series: [{
+            minPointSize: 10,
+            innerSize: '20%',
+            zMin: 0,
+            name: 'countries',
+            borderRadius: 5,
+            data: [
+            {% for diccionario in diccionarioCats %}
+                {
+                    name: '{{diccionario.name}}',
+                    y: {{diccionario.cantidad}}                    
+                },
+            {% endfor %}   
+            ],
+            colors: [
+                '#4caefe',
+                '#3dc3e8',
+                '#2dd9db',
+                '#1feeaf',
+                '#0ff3a0',
+                '#00e887',
+                '#23e274',
+                '#704cfe',
+                '#809159',
+                '#cf6a51'
+            ]
+        }]
+    });
+
+</script>
 </body>
 {% endblock %}

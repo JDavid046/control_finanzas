@@ -729,7 +729,13 @@ def categorias(request):
     if request.method != "POST":
         categorias = Categorias.objects.filter(usuario=request.user)
         form = CategoriasForm()
-        contexto = {"categorias":categorias,"form": form}
+        diccionario = []
+        diccionario.append({"name": "Ninguna", "cantidad": str(Movimiento.objects.filter(usuario=request.user, categoria=None).count())})        
+
+        for categoria in categorias:            
+            diccionario.append({"name": categoria.descripcion, "cantidad": str(Movimiento.objects.filter(categoria=categoria.id).count())})        
+
+        contexto = {"categorias":categorias,"form": form, "diccionarioCats": diccionario}
     else:
         form = CategoriasForm(request.POST)
         contexto = {"form": form}
