@@ -790,5 +790,5 @@ def eliminarCategoria(request, id):
     categoria = Categorias.objects.get(id=id)    
     categoria.delete()
 
-    return redirect("programador")
+    return redirect("categorias")
     

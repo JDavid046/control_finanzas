@@ -121,7 +121,8 @@ class excel:
 
         for row in rows:
             rowDescripcion = str(row[1]).replace('\n', ' ').replace('\r','')
-            writer.writerow([str(row[0]), rowDescripcion, str(row[2]), str(row[3]), str(row[4])])        
+            rowValor = str(row[2]).split('.')[0]
+            writer.writerow([str(row[0]), rowDescripcion, rowValor, str(row[3]), str(row[4])])        
 
         return response
 
