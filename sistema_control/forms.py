@@ -64,13 +64,13 @@ class EditarMovimientoForm(forms.ModelForm):
 
     class Meta:
         model = Movimiento
-        fields = ['descripcionMovimiento', 'fechaMovimiento']
-        #fields = ['tipoMovimiento', 'descripcionMovimiento', 'valorMovimiento', 'fechaMovimiento']
+        #fields = ['descripcionMovimiento', 'fechaMovimiento']
+        fields = ['tipoMovimiento', 'descripcionMovimiento', 'valorMovimiento', 'fechaMovimiento']
 
         widgets = {
-            #'tipoMovimiento': forms.Select(attrs={'class':'form-select'}),
+            'tipoMovimiento': forms.Select(attrs={'class':'form-select'}),
             'descripcionMovimiento': forms.Textarea(attrs={'class':'form-control'}),
-            #'valorMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'50'}),   
+            'valorMovimiento': forms.NumberInput(attrs={'class':'form-control', 'min':'50'}),   
             'fechaMovimiento': forms.DateInput(
                 format=('%Y-%m-%d'),
                 attrs={
