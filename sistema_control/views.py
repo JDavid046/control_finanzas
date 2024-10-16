@@ -26,6 +26,7 @@ from django.db.models.functions import Extract
 from django.db import connection
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
+from .calculoMovimientos import *
 
 
 def logout_view(request):
@@ -484,6 +485,7 @@ def calculoNuevoCapital(usuario, valorMovimiento, tipoMovimiento, accion, valorA
 @login_required
 def editar_movimiento(request, id):
     movimiento = Movimiento.objects.get(id=id)
+    tipoMovimientoAnterior = movimiento.tipoMovimiento.id
     valorAnterior = movimiento.valorMovimiento
     categorias = Categorias.objects.filter(usuario=request.user)
     if request.method != "POST":
@@ -495,11 +497,11 @@ def editar_movimiento(request, id):
         contexto = {"form": form}
 
         if form.is_valid():
-
-            #tipoNuevoMovimientoId = request.POST["tipoMovimiento"]
-            #tipoMovimiento = TipoMovimiento.objects.get(id=tipoNuevoMovimientoId)
+            usuario = request.user
+            tipoNuevoMovimientoId = request.POST["tipoMovimiento"]
+            tipoMovimiento = TipoMovimiento.objects.get(id=tipoNuevoMovimientoId)
             descripcionMovimiento = request.POST.get("descripcionMovimiento")
-            #valorMovimiento = request.POST.get("valorMovimiento")
+            valorMovimiento = request.POST.get("valorMovimiento")
 
             categoria = request.POST["categoria"]            
             tipoCategoria = None if categoria == '0' else Categorias.objects.get(id=categoria)
@@ -509,26 +511,24 @@ def editar_movimiento(request, id):
             if fecha > str(datetime.date.today()):  
                 form = EditarMovimientoForm(instance=movimiento)
                 contexto = {"form": form, "mensaje": "La fecha no puede ser posterior a la fecha de hoy" ,"errores": True}
-            else:                                          
-                form.save()
-                movimiento.categoria = tipoCategoria
-                movimiento.save()
-                return HttpResponseRedirect(reverse("movimientos"))
-        
-            """calculo = calculoNuevoCapital(
-                    request.user,
-                    int(float(valorMovimiento)),
-                    tipoMovimiento.id,
-                    "editar",
-                    valorAnterior,
-                )
-                if calculo:
+            else:       
+                user = Profile.objects.get(user=usuario)
+                capital = user.capitalTotal                     
 
+                try:
+                    nuevoCapital = calcularCapitalMovimiento(float(valorAnterior), str(tipoMovimientoAnterior), float(valorMovimiento), tipoNuevoMovimientoId, float(capital))  
+                    user.capitalTotal = nuevoCapital
+                    user.save()                            
                     form.save()
+                    movimiento.categoria = tipoCategoria
+                    movimiento.save()
+
                     return HttpResponseRedirect(reverse("movimientos"))
-                else:
-                    form = MovimientoForm(instance=movimiento)
-                    contexto = {"form": form, "errores": True}"""
+                
+                except:
+                    form = EditarMovimientoForm(instance=movimiento)
+                    contexto = {"form": form, "mensaje": "Ocurrió un error." ,"errores": True}
+                
         else:
             form = EditarMovimientoForm(instance=movimiento)
             contexto = {"form": form, "errores": True}
