@@ -3,7 +3,7 @@ from .base import *
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['misfinanzasapp.pythonanywhere.com']
+ALLOWED_HOSTS = ['']
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -11,10 +11,10 @@ ALLOWED_HOSTS = ['misfinanzasapp.pythonanywhere.com']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'misfinanzasapp$default',
-        'USER': 'misfinanzasapp',
-        'PASSWORD': 'S1st3m4s',
-        'HOST': 'misfinanzasapp.mysql.pythonanywhere-services.com',   # Or an IP Address that your DB is hosted on
+        'NAME': '',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
     }
 }
