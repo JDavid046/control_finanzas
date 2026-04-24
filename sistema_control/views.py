@@ -3,7 +3,7 @@ from datetime import date
 import re
 from .excel import excel
 from django.conf import settings
-from django.db.models import query
+from django.db.models import query, DecimalField
 import numpy as np
 from django.contrib.auth.forms import UserCreationForm
 from numpy.random.mtrand import randint
@@ -27,6 +27,8 @@ from django.db import connection
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from .calculoMovimientos import *
+from django.db.models import Sum, Case, When, IntegerField, F
+from django.db.models.functions import ExtractMonth
 
 
 def logout_view(request):
@@ -353,21 +355,33 @@ def obtener_egresos_por_mes(request, year):
 
 def obtener_ahorro_por_mes(request, year):
     user= User.objects.values("id").filter(username=request.user)
-    query = (        
-        f"SELECT EXTRACT(month from fechaMovimiento) AS month_number,"
-        f" sum( CASE WHEN tipoMovimiento_id = 1 THEN valorMovimiento WHEN tipoMovimiento_id = 2 THEN -valorMovimiento END ) as capital"
-        f" FROM sistema_control_movimiento WHERE usuario_id = {user[0]['id']}"
-        f" AND fechaMovimiento LIKE '%{year}%' GROUP BY month_number"
+ 
+    capital = (
+        Movimiento.objects.filter(
+            usuario_id=user[0]['id'],
+            fechaMovimiento__year=year
+        ).annotate(
+            month_number=ExtractMonth('fechaMovimiento'),
+            signed_value=Case(
+                When(tipoMovimiento_id=1, then=F('valorMovimiento')),
+                When(tipoMovimiento_id=2, then=-F('valorMovimiento')),
+                default=0,
+                output_field=DecimalField()
+            )
+        ).values('month_number').annotate(
+            capital=Sum('signed_value')
+        ).order_by('month_number')
     )
 
-    with connection.cursor() as cursor:
-        cursor.execute(query)
-        capital = cursor.fetchall()
+    capital_dict = {
+        item['month_number']: float(item['capital'] or 0)
+        for item in capital
+    }
 
-    ahorro_por_mes = [0 for x in range(1, 13)]
-
-    for x in range(len(capital)):        
-        ahorro_por_mes[int(capital[x][0])-1] = float(capital[x][1])        
+    ahorro_por_mes = [
+        capital_dict.get(mes, 0)
+        for mes in range(1, 13)
+    ]   
     
     return ahorro_por_mes
 

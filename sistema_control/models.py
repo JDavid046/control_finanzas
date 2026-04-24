@@ -43,5 +43,5 @@ class Programador(models.Model):
     tipoMovimiento = models.ForeignKey(TipoMovimiento, null=False, blank=False, on_delete=models.RESTRICT)
     descripcionMovimientoProgramado = models.TextField()
     valorMovimientoProgramado = models.DecimalField(max_digits=20, decimal_places=2)
-    fechaMovimientoProgramado = models.IntegerField()
+    fechaMovimientoProgramado = models.DateField(null=True)
     ultimaFechaEjecucion = models.DateField(null=True)
