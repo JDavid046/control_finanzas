@@ -7,6 +7,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from sistema_control.forms import MovimientoForm
 from sistema_control.models import Movimiento, Profile, TipoMovimiento, Categorias
+from io import StringIO
+from django.db import transaction
 
 def calculoNuevoCapital(usuario, valorMovimiento, tipoMovimiento, accion, valorAnterior):
         estatus = False
@@ -33,14 +35,14 @@ def verificarCategoria(prmCategoria, prmUser):
     if(prmCategoria == "None"): return categoriaRetorno
 
     try:
-        categoria = Categorias.objects.get(descripcion=prmCategoria)
+        categoria = Categorias.objects.get(descripcion=prmCategoria, usuario=prmUser)
         categoriaRetorno = categoria
     except:
         Categorias.objects.create(
                     descripcion = prmCategoria,
                     usuario=prmUser,
                 )
-        categoriaRetorno = Categorias.objects.get(descripcion=prmCategoria)
+        categoriaRetorno = Categorias.objects.get(descripcion=prmCategoria, usuario=prmUser)
     
     return categoriaRetorno
 
@@ -128,78 +130,81 @@ class excel:
 
 
     def upload_excel(request):
-        usuario = User.objects.get(id=request.user.id)    
-        data = {}
-        if "POST" == request.method:
-            
+        usuario = request.user
+
+        if request.method == "POST":
+
             try:
-                csv_file = request.FILES["csv_file"]
-                if not csv_file.name.endswith('.csv'):
-                    movimientoForm = MovimientoForm()
-                    movimientos = Movimiento.objects.filter(usuario=request.user)
-                    context = {
-                            "movimientos": movimientos,
-                            "mensaje": "El archivo debe ser un archivo .csv",
-                            "errores": True,
-                            "form": movimientoForm
-                        }
-                    
-                #if file is too large, return
-                elif csv_file.multiple_chunks():
-                    movimientoForm = MovimientoForm()
-                    movimientos = Movimiento.objects.filter(usuario=request.user)
-                    context = {
-                            "movimientos": movimientos,
-                            "mensaje": "El archivo supera el peso permitido.",
-                            "errores": True,
-                            "form": movimientoForm
-                        }
-                else:
-                    
-                    file_data = csv_file.read().decode("utf-8")
-                    
-                    lines = file_data.split("\n")[1:]
-                    
-                    for line in lines:
-                        if(str(line).strip() != ''):
-                            fields = line.split("|")
-                            data_dict = {}
-                            data_dict["tipoMovimiento"] = fields[0]
-                            data_dict["descripcionMovimiento"] = fields[1]
-                            data_dict["valorMovimiento"] = fields[2]
-                            data_dict["fechaMovimiento"] = str(fields[3]).strip()
-                            data_dict["usuario"] = usuario
-                            laCategoria = str(fields[4]).strip()
+                file = request.FILES["csv_file"]
 
-                            try:
-                                form = MovimientoForm(data_dict)                
-                                if form.is_valid():
-                                    calculo = calculoNuevoCapital(
-                                        request.user,
-                                        int(data_dict["valorMovimiento"].split('.')[0]),
-                                        int(data_dict["tipoMovimiento"]),
-                                        "nuevo",
-                                        None,
-                                    )
-                                if calculo:
+                if not file.name.endswith(".csv"):
+                    return render(request, "movimientos.html", {
+                        "mensaje": "El archivo debe ser .csv",
+                        "errores": True,
+                        "form": MovimientoForm()
+                    })
 
-                                    Movimiento.objects.create(
-                                        descripcionMovimiento=data_dict["descripcionMovimiento"],
-                                        fechaMovimiento=data_dict["fechaMovimiento"],
-                                        tipoMovimiento = TipoMovimiento.objects.get(id=data_dict["tipoMovimiento"]),
-                                        usuario=data_dict["usuario"],
-                                        valorMovimiento=data_dict["valorMovimiento"],
-                                        categoria = verificarCategoria(laCategoria, request.user)
-                                    )
+                if file.multiple_chunks():
+                    return render(request, "movimientos.html", {
+                        "mensaje": "El archivo es demasiado grande",
+                        "errores": True,
+                        "form": MovimientoForm()
+                    })
 
-                            except Exception as e:                
-                                pass                 
+                decoded = file.read().decode("utf-8")
+                io_string = StringIO(decoded)
+                reader = csv.reader(io_string, delimiter="|")
 
-                    return HttpResponseRedirect(reverse("movimientos"))                    
-                    
-            except Exception as e:
-                pass
+                next(reader)  # saltar header
+
+                movimientos = []
+
+                for row in reader:
+                    if not row:
+                        continue
+
+                    tipo = int(row[0])
+                    descripcion = row[1]
+                    valor = float(row[2])
+                    fecha = row[3].strip()
+                    categoria_raw = row[4].strip()
+
+                    # lógica externa (idealmente debería optimizarse también)
+                    calculo = calculoNuevoCapital(
+                        usuario,
+                        int(str(valor).split('.')[0]),
+                        tipo,
+                        "nuevo",
+                        None,
+                    )
+
+                    if calculo:
+                        movimientos.append(
+                            Movimiento(
+                                descripcionMovimiento=descripcion,
+                                fechaMovimiento=fecha,
+                                tipoMovimiento_id=tipo,
+                                usuario=usuario,
+                                valorMovimiento=valor,
+                                categoria=verificarCategoria(categoria_raw, usuario)
+                            )
+                        )
                 
-        return render(request, "movimientos.html", context)
+                with transaction.atomic():
+                    Movimiento.objects.bulk_create(movimientos, batch_size=1000)
+
+                return HttpResponseRedirect(reverse("movimientos"))
+
+            except Exception as e:                
+                print("ERROR UPLOAD:", str(e))
+                return render(request, "movimientos.html", {
+                    "mensaje": "Error procesando archivo",
+                    "errores": True,
+                    "form": MovimientoForm()
+                })
+
+        return render(request, "movimientos.html", {
+            "form": MovimientoForm()
+        })
     
     

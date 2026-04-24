@@ -11,10 +11,10 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'misfinanzasapp',
-        'USER': 'admin',
-        'PASSWORD': '1q2w3e4r',
-        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
-        'PORT': '3306',
+        'NAME': '',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',   # Or an IP Address that your DB is hosted on
+        'PORT': '',
     }
 }
